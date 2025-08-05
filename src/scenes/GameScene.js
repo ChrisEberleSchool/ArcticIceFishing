@@ -65,6 +65,11 @@ export default class GameScene extends Phaser.Scene {
 
     // ✅ Setup socket *after* assets are ready
     this.setupSocketEvents();
+
+    // Send initPlayer with username or some data after scene loads
+    this.socket.emit("initPlayer", {
+      username: "Player_" + this.socket.id.slice(0, 5),
+    });
   }
 
   update() {
@@ -89,25 +94,50 @@ export default class GameScene extends Phaser.Scene {
       x: this.localPlayer.x,
       y: this.localPlayer.y,
     });
+
+    // Smoothly interpolate other players toward target positions
+    for (const id in this.players) {
+      if (id === this.socket.id) continue;
+      const player = this.players[id];
+      if (player.target) {
+        player.x += (player.target.x - player.x) * 0.1;
+        player.y += (player.target.y - player.y) * 0.1;
+      }
+    }
   }
 
   setupSocketEvents() {
     this.socket.on("currentPlayers", (players) => {
       for (const id in players) {
-        if (id !== this.socket.id) {
+        if (id !== this.socket.id && !this.players[id]) {
           this.addOtherPlayer(id, players[id]);
         }
       }
     });
 
     this.socket.on("newPlayer", (playerInfo) => {
-      this.addOtherPlayer(playerInfo.id, playerInfo);
+      if (!this.players[playerInfo.id]) {
+        this.addOtherPlayer(playerInfo.id, playerInfo);
+      }
     });
 
-    this.socket.on("playerMoved", (playerInfo) => {
-      const player = this.players[playerInfo.id];
-      if (player) {
-        player.setPosition(playerInfo.x, playerInfo.y);
+    this.socket.on("playersUpdate", (players) => {
+      for (const id in players) {
+        if (id === this.socket.id) continue; // skip local player
+        const info = players[id];
+        if (!this.players[id]) {
+          this.addOtherPlayer(id, info);
+        }
+        // Update target position for smooth interpolation
+        this.players[id].target = { x: info.x, y: info.y };
+      }
+
+      // Remove players no longer on server
+      for (const id in this.players) {
+        if (!players[id]) {
+          this.players[id].destroy();
+          delete this.players[id];
+        }
       }
     });
 
@@ -125,6 +155,7 @@ export default class GameScene extends Phaser.Scene {
       .setScale(2)
       .setOrigin(0.5, 0.5);
     other.play("idle");
+    other.target = { x: info.x, y: info.y }; // initialize target for smooth movement
     this.players[id] = other;
   }
 }
