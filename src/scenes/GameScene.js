@@ -11,37 +11,6 @@ export default class GameScene extends Phaser.Scene {
     this.localPlayer = null;
     this.socket = socket;
     this.playerSpeed = speedDown + 50;
-
-    // 🧠 Setup socket event handlers early to avoid missing events
-    this.setupSocketEvents();
-  }
-
-  setupSocketEvents() {
-    this.socket.on("currentPlayers", (players) => {
-      for (const id in players) {
-        if (id !== this.socket.id) {
-          this.addOtherPlayer(id, players[id]);
-        }
-      }
-    });
-
-    this.socket.on("newPlayer", (playerInfo) => {
-      this.addOtherPlayer(playerInfo.id, playerInfo);
-    });
-
-    this.socket.on("playerMoved", (playerInfo) => {
-      const player = this.players[playerInfo.id];
-      if (player) {
-        player.setPosition(playerInfo.x, playerInfo.y);
-      }
-    });
-
-    this.socket.on("playerDisconnected", (id) => {
-      if (this.players[id]) {
-        this.players[id].destroy();
-        delete this.players[id];
-      }
-    });
   }
 
   preload() {
@@ -93,6 +62,9 @@ export default class GameScene extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.A,
       right: Phaser.Input.Keyboard.KeyCodes.D,
     });
+
+    // ✅ Setup socket *after* assets are ready
+    this.setupSocketEvents();
   }
 
   update() {
@@ -116,6 +88,34 @@ export default class GameScene extends Phaser.Scene {
     this.socket.emit("playerMovement", {
       x: this.localPlayer.x,
       y: this.localPlayer.y,
+    });
+  }
+
+  setupSocketEvents() {
+    this.socket.on("currentPlayers", (players) => {
+      for (const id in players) {
+        if (id !== this.socket.id) {
+          this.addOtherPlayer(id, players[id]);
+        }
+      }
+    });
+
+    this.socket.on("newPlayer", (playerInfo) => {
+      this.addOtherPlayer(playerInfo.id, playerInfo);
+    });
+
+    this.socket.on("playerMoved", (playerInfo) => {
+      const player = this.players[playerInfo.id];
+      if (player) {
+        player.setPosition(playerInfo.x, playerInfo.y);
+      }
+    });
+
+    this.socket.on("playerDisconnected", (id) => {
+      if (this.players[id]) {
+        this.players[id].destroy();
+        delete this.players[id];
+      }
     });
   }
 
