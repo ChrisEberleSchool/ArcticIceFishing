@@ -9,8 +9,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.players = {};
     this.localPlayer = null;
-    this.socket = socket;
-    this.playerSpeed = speedDown + 50;
+    this.socket = null;
+    this.username = null;
+    this.playerSpeed = 350;
+  }
+
+  init(data) {
+    this.socket = data.socket;
+    this.username = data.username;
   }
 
   preload() {
