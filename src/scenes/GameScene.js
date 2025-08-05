@@ -59,6 +59,7 @@ export default class GameScene extends Phaser.Scene {
     this.localPlayer.play("idle");
 
     this.cameras.main.startFollow(this.localPlayer);
+    this.cameras.main.zoom = 2.5;
     this.cameras.main.roundPixels = true;
 
     this.cursor = this.input.keyboard.addKeys({

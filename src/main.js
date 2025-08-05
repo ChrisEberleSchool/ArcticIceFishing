@@ -1,3 +1,4 @@
+import "./style.css";
 import Phaser from "phaser";
 import GameScene from "./scenes/GameScene.js";
 import socket from "/network/socket.js";
@@ -13,7 +14,7 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 0 },
-      debug: true,
+      debug: false,
     },
   },
   scene: [GameScene],

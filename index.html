@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Arctic Ice Fishing</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main>
@@ -27,7 +28,20 @@
       </div>
 
       <!-- Game Canvas -->
-      <canvas id="gameCanvas" style="display: none"></canvas>
+      <canvas id="gameCanvas"></canvas>
+      <div id="chatContainer">
+        <div id="chatMessages"></div>
+        <form id="chatForm">
+          <input
+            id="chatInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Type message..."
+            required
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
     </main>
 
     <footer>Created by Chris Eberle 2025</footer>
