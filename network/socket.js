@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
 // This makes the socket connection reusable across all scenes/modules
-const socket = io("http://localhost:3000");
+const socket = io("https://arcticicefishing.onrender.com");
 
 export default socket;
