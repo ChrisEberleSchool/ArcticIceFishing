@@ -1,17 +1,35 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/assets/bg.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Arctic Ice Fishing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
-    <header>
-      <p>Arctic Ice Fishing</p>
-    </header>
     <main>
-      <canvas id="gameCanvas"></canvas>
+      <!-- Login/Signup UI -->
+      <div id="loginScreen">
+        <h2>Login or Signup</h2>
+        <form id="loginForm">
+          <input id="username" type="text" placeholder="Username" required />
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            required
+          />
+          <select id="authMode">
+            <option value="login">Login</option>
+            <option value="signup">Signup</option>
+          </select>
+          <button type="submit">Enter Game</button>
+        </form>
+      </div>
+
+      <!-- Game Canvas -->
+      <canvas id="gameCanvas" style="display: none"></canvas>
     </main>
+
     <footer>Created by Chris Eberle 2025</footer>
     <script type="module" src="/src/main.js"></script>
   </body>

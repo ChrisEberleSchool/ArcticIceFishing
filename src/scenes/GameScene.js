@@ -27,7 +27,12 @@ export default class GameScene extends Phaser.Scene {
     );
   }
 
-  create() {
+  create(data) {
+    const username = data?.username;
+    if (!username) {
+      console.error("Missing username. Game aborted.");
+      return;
+    }
     const map = this.make.tilemap({
       key: "map1",
       tileWidth: 32,
@@ -65,11 +70,7 @@ export default class GameScene extends Phaser.Scene {
 
     // ✅ Setup socket *after* assets are ready
     this.setupSocketEvents();
-
-    // Send initPlayer with username or some data after scene loads
-    this.socket.emit("initPlayer", {
-      username: "Player_" + this.socket.id,
-    });
+    this.socket.emit("initPlayer", { username });
   }
 
   update() {

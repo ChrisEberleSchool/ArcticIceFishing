@@ -1,68 +1,77 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import bcrypt from "bcrypt";
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
-// Store players who have initialized
+const users = {};
 const players = {};
 
-// On client connection
 io.on("connection", (socket) => {
-  console.log(`Player connected: ${socket.id}`);
+  console.log("Connected:", socket.id);
 
-  // Wait for client to send initPlayer with username (or any info)
-  socket.on("initPlayer", (data) => {
-    // Example data could include username, initial position, etc
-    players[socket.id] = {
-      x: 250,
-      y: 250,
-      username: data.username || "Anonymous",
-      id: socket.id,
-    };
+  socket.on("signup", async ({ username, password }) => {
+    if (!username || !password)
+      return socket.emit("authError", "Missing fields");
+    if (users[username]) return socket.emit("authError", "Username exists");
 
-    // Send current players to the new player
-    socket.emit("currentPlayers", players);
-
-    // Notify others about the new player
-    socket.broadcast.emit("newPlayer", players[socket.id]);
-
-    console.log(
-      `Player initialized: ${socket.id} (${players[socket.id].username})`
-    );
+    const hash = await bcrypt.hash(password, 10);
+    users[username] = { password: hash, socketId: socket.id };
+    socket.emit("authSuccess");
   });
 
-  // Player movement update
-  socket.on("playerMovement", (data) => {
-    if (!players[socket.id]) return; // Ignore if player not initialized
+  socket.on("login", async ({ username, password }) => {
+    const user = users[username];
+    if (!user) return socket.emit("authError", "User not found");
 
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return socket.emit("authError", "Incorrect password");
+
+    users[username].socketId = socket.id;
+    socket.emit("authSuccess");
+  });
+
+  socket.on("initPlayer", ({ username }) => {
+    if (!users[username] || users[username].socketId !== socket.id) {
+      return socket.emit("authError", "Unauthorized");
+    }
+
+    players[socket.id] = { id: socket.id, username, x: 250, y: 250 };
+    socket.emit("currentPlayers", players);
+    socket.broadcast.emit("newPlayer", players[socket.id]);
+  });
+
+  socket.on("playerMovement", (data) => {
+    if (!players[socket.id]) return;
     players[socket.id].x = data.x;
     players[socket.id].y = data.y;
   });
 
-  // Handle disconnection
   socket.on("disconnect", () => {
     if (players[socket.id]) {
-      console.log(
-        `Player disconnected: ${socket.id} (${players[socket.id].username})`
-      );
+      const username = players[socket.id].username;
       delete players[socket.id];
-
-      // Notify all clients player left
       io.emit("playerDisconnected", socket.id);
+      console.log("Disconnected:", username);
+    }
+
+    for (const name in users) {
+      if (users[name].socketId === socket.id) {
+        users[name].socketId = null;
+      }
     }
   });
 });
 
-// Server game loop: broadcast player states every 50ms (~20fps)
 setInterval(() => {
   io.emit("playersUpdate", players);
 }, 50);
 
 server.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
