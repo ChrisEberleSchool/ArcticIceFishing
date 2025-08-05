@@ -7,12 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const users = {}; // Fake user database
+const users = {}; // 🔒 in-memory fake user DB
 const players = {};
 
 app.post("/api/signup", (req, res) => {
   const { username, password } = req.body;
-  if (users[username]) return res.status(400).json({ message: "User exists" });
+  if (users[username]) {
+    return res.status(400).json({ message: "User already exists" });
+  }
   users[username] = { password };
   res.json({ username });
 });
@@ -20,8 +22,9 @@ app.post("/api/signup", (req, res) => {
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const user = users[username];
-  if (!user || user.password !== password)
+  if (!user || user.password !== password) {
     return res.status(401).json({ message: "Invalid credentials" });
+  }
   res.json({ username });
 });
 
@@ -32,18 +35,17 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   const username = socket.handshake.query.username || "Unknown";
-  console.log(`Player connected: ${username} (${socket.id})`);
+  console.log(`✅ ${username} connected: ${socket.id}`);
 
-  players[socket.id] = {
+  players[socket.id] = { x: 250, y: 250, username };
+
+  socket.emit("currentPlayers", players);
+
+  socket.broadcast.emit("newPlayer", {
+    id: socket.id,
     x: 250,
     y: 250,
     username,
-  };
-
-  socket.emit("currentPlayers", players);
-  socket.broadcast.emit("newPlayer", {
-    id: socket.id,
-    ...players[socket.id],
   });
 
   socket.on("playerMovement", (data) => {
@@ -60,7 +62,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log(`Player disconnected: ${socket.id}`);
+    console.log(`❌ Disconnected: ${socket.id}`);
     delete players[socket.id];
     io.emit("playerDisconnected", socket.id);
   });
@@ -68,5 +70,5 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

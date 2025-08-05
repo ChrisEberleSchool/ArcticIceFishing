@@ -1,12 +1,13 @@
 import { io } from "socket.io-client";
 
-// This makes the socket connection reusable across all scenes/modules
-const socket = io("https://arcticicefishing.onrender.com");
+const SERVER_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://arcticicefishing.onrender.com";
 
 export function connectSocket(username) {
-  return io({
+  return io(SERVER_URL, {
     query: { username },
+    transports: ["websocket"],
   });
 }
-
-export default socket;
