@@ -1,5 +1,5 @@
 import "./style.css";
-import Phaser from "./phaser";
+import Phaser from "phaser";
 import GameScene from "./scenes/GameScene.js";
 import sizes from "./config/gameConfig.js";
 
