@@ -68,7 +68,7 @@ export default class GameScene extends Phaser.Scene {
 
     // Send initPlayer with username or some data after scene loads
     this.socket.emit("initPlayer", {
-      username: "Player_" + this.socket.id.slice(0, 5),
+      username: "Player_" + this.socket.id,
     });
   }
 
