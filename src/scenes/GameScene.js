@@ -58,6 +58,16 @@ export default class GameScene extends Phaser.Scene {
     this.localPlayer.setScale(2);
     this.localPlayer.play("idle");
 
+    this.localPlayerName = this.add
+      .text(this.localPlayer.x, this.localPlayer.y - 24, data.username, {
+        fontSize: "12px",
+        color: "#ffffff",
+        fontFamily: "Arial",
+        stroke: "#000",
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
+
     this.cameras.main.startFollow(this.localPlayer);
     this.cameras.main.zoom = 2.5;
     this.cameras.main.roundPixels = true;
@@ -91,6 +101,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.localPlayer.setVelocity(vx, vy);
 
+    this.localPlayerName.x = this.localPlayer.x;
+    this.localPlayerName.y = this.localPlayer.y - 24;
+
     // 🛰 Emit position update
     this.socket.emit("playerMovement", {
       x: this.localPlayer.x,
@@ -100,10 +113,16 @@ export default class GameScene extends Phaser.Scene {
     // Smoothly interpolate other players toward target positions
     for (const id in this.players) {
       if (id === this.socket.id) continue;
+
       const player = this.players[id];
-      if (player.target) {
-        player.x += (player.target.x - player.x) * 0.1;
-        player.y += (player.target.y - player.y) * 0.1;
+      const { sprite, nameText, target } = player;
+
+      if (target) {
+        sprite.x += (target.x - sprite.x) * 0.1;
+        sprite.y += (target.y - sprite.y) * 0.1;
+
+        nameText.x = sprite.x;
+        nameText.y = sprite.y - 24;
       }
     }
   }
@@ -152,12 +171,28 @@ export default class GameScene extends Phaser.Scene {
   }
 
   addOtherPlayer(id, info) {
-    const other = this.add
+    const sprite = this.add
       .sprite(info.x, info.y, "playerIdleSheet")
       .setScale(2)
       .setOrigin(0.5, 0.5);
-    other.play("idle");
-    other.target = { x: info.x, y: info.y }; // initialize target for smooth movement
-    this.players[id] = other;
+    sprite.play("idle");
+
+    const nameText = this.add
+      .text(info.x, info.y - 24, info.username, {
+        fontSize: "12px",
+        color: "#ffffff",
+        fontFamily: "Arial",
+        stroke: "#000",
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
+
+    const playerContainer = {
+      sprite: sprite,
+      nameText: nameText,
+      target: { x: info.x, y: info.y },
+    };
+
+    this.players[id] = playerContainer;
   }
 }
