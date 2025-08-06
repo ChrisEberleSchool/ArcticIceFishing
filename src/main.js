@@ -33,12 +33,16 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
   const authEvent = isSignup ? "signup" : "login";
   socket.emit(authEvent, { username, password });
 
-  socket.once("authSuccess", () => {
+  // ✅ Auth success handler (for both login & signup)
+  socket.once("authSuccess", (data) => {
+    // `data.username` might be undefined if server didn't send it — fallback
+    const uname = data?.username || username;
+
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("gameCanvas").style.display = "block";
 
     const game = new Phaser.Game(config);
-    game.scene.start("scene-game", { username });
+    game.scene.start("scene-game", { username: uname });
   });
 
   socket.once("authError", (msg) => {

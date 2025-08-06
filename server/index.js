@@ -22,10 +22,11 @@ io.on("connection", (socket) => {
 
     const hash = await bcrypt.hash(password, 10);
     users[username] = { password: hash, socketId: socket.id };
-    socket.emit("authSuccess");
+
+    // Treat signup as an authenticated session
+    socket.emit("authSuccess", { username });
     console.log("Player Joined World:", username);
   });
-
   socket.on("login", async ({ username, password }) => {
     const user = users[username];
     if (!user) return socket.emit("authError", "User not found");
