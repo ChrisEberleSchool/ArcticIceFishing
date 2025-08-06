@@ -1,16 +1,14 @@
 import Phaser from "phaser";
-import socket from "/network/socket.js"; // assuming this exports an already-connected socket
-
-const speedDown = 300;
+import socket from "/network/socket.js";
+import Player from "../objects/Player.js";
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super("scene-game");
 
-    this.players = {};
+    this.players = {}; // other players
     this.localPlayer = null;
     this.socket = socket;
-    this.playerSpeed = speedDown + 50;
   }
 
   preload() {
@@ -29,10 +27,8 @@ export default class GameScene extends Phaser.Scene {
 
   create(data) {
     const username = data?.username;
-    if (!username) {
-      console.error("Missing username. Game aborted.");
-      return;
-    }
+    if (!username) return console.error("Missing username");
+
     const map = this.make.tilemap({
       key: "map1",
       tileWidth: 32,
@@ -52,34 +48,16 @@ export default class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    this.localPlayer = this.physics.add
-      .sprite(250, 250, "playerIdleSheet")
-      .setOrigin(0.5, 0.5);
-    this.localPlayer.setScale(2);
-    this.localPlayer.play("idle");
+    // Create local player
+    this.localPlayer = new Player(this, 250, 250, username);
 
-    this.localPlayerName = this.add
-      .text(this.localPlayer.x, this.localPlayer.y - 24, data.username, {
-        fontSize: "12px",
-        color: "#ffffff",
-        fontFamily: "Arial",
-        stroke: "#000",
-        strokeThickness: 3,
-      })
-      .setOrigin(0.5);
-
-    this.cameras.main.startFollow(this.localPlayer);
-    this.cameras.main.zoom = 2.5;
-    this.cameras.main.roundPixels = true;
-
-    this.cursor = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D,
+    // Handle click/tap movement
+    this.input.mouse.disableContextMenu();
+    this.input.on("pointerdown", (pointer) => {
+      if (pointer.rightButtonDown()) return;
+      this.localPlayer.moveTo(pointer.worldX, pointer.worldY);
     });
 
-    // ✅ Setup socket *after* assets are ready
     this.setupSocketEvents();
     this.socket.emit("initPlayer", { username });
   }
@@ -87,40 +65,21 @@ export default class GameScene extends Phaser.Scene {
   update() {
     if (!this.localPlayer) return;
 
-    const { left, right, up, down } = this.cursor;
-    const speed = this.playerSpeed;
+    this.localPlayer.update();
 
-    let vx = 0;
-    let vy = 0;
-
-    if (left.isDown) vx = -speed;
-    else if (right.isDown) vx = speed;
-
-    if (up.isDown) vy = -speed;
-    else if (down.isDown) vy = speed;
-
-    this.localPlayer.setVelocity(vx, vy);
-
-    this.localPlayerName.x = this.localPlayer.x;
-    this.localPlayerName.y = this.localPlayer.y - 24;
-
-    // 🛰 Emit position update
+    // Emit movement to server
     this.socket.emit("playerMovement", {
       x: this.localPlayer.x,
       y: this.localPlayer.y,
     });
 
-    // Smoothly interpolate other players toward target positions
+    // Update other players
     for (const id in this.players) {
-      if (id === this.socket.id) continue;
-
-      const player = this.players[id];
-      const { sprite, nameText, target } = player;
+      const { sprite, nameText, target } = this.players[id];
 
       if (target) {
         sprite.x += (target.x - sprite.x) * 0.1;
         sprite.y += (target.y - sprite.y) * 0.1;
-
         nameText.x = sprite.x;
         nameText.y = sprite.y - 24;
       }
@@ -144,16 +103,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.socket.on("playersUpdate", (players) => {
       for (const id in players) {
-        if (id === this.socket.id) continue; // skip local player
+        if (id === this.socket.id) continue;
         const info = players[id];
         if (!this.players[id]) {
           this.addOtherPlayer(id, info);
         }
-        // Update target position for smooth interpolation
         this.players[id].target = { x: info.x, y: info.y };
       }
 
-      // Remove players no longer on server
       for (const id in this.players) {
         if (!players[id]) {
           this.players[id].sprite.destroy();
@@ -176,7 +133,7 @@ export default class GameScene extends Phaser.Scene {
     const sprite = this.add
       .sprite(info.x, info.y, "playerIdleSheet")
       .setScale(2)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5);
     sprite.play("idle");
 
     const nameText = this.add
@@ -189,12 +146,10 @@ export default class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const playerContainer = {
-      sprite: sprite,
-      nameText: nameText,
+    this.players[id] = {
+      sprite,
+      nameText,
       target: { x: info.x, y: info.y },
     };
-
-    this.players[id] = playerContainer;
   }
 }
