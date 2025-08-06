@@ -112,15 +112,16 @@ button:active {
 }
 
 #gameCanvas {
-  display: none; /* Keep this hidden initially, toggle to block with JS */
-  position: fixed; /* fixed to cover viewport */
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  border-radius: 0;
-  box-shadow: none; /* Optional: keep or remove */
-  z-index: 1000; /* Above other UI */
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 8px;
+  box-shadow: 0 0 20px var(--accent-color);
+  z-index: 1000;
+  max-width: 90vw;
+  max-height: 80vh;
   touch-action: none; /* Disable default gestures on canvas */
 }
 

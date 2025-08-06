@@ -52,10 +52,11 @@ export default class GameScene extends Phaser.Scene {
     this.localPlayer = new Player(this, 250, 250, username);
 
     // Handle click/tap movement
+    this.input.mouse.disableContextMenu();
     this.input.addPointer(2);
     this.input.on("pointerdown", (pointer) => {
       // Ignore only actual right mouse clicks
-      if (pointer.pointerType === "mouse" && pointer.button === 2) return;
+      if (pointer.pointerType === "mouse" && pointer.rightButtonDown()) return;
 
       // Touch or left-click
       this.localPlayer.moveTo(pointer.worldX, pointer.worldY);
