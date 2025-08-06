@@ -53,13 +53,39 @@ export default class GameScene extends Phaser.Scene {
 
     // Handle click/tap movement
     this.input.addPointer(2);
-    this.input.mouse.disableContextMenu();
     this.input.on("pointerdown", (pointer) => {
-      // Ignore only actual right mouse clicks
-      if (pointer.pointerType === "mouse" && pointer.rightButtonDown()) return;
+      if (pointer.pointerType === "mouse") {
+        // For mouse, ignore right clicks
+        if (pointer.button === 2) return;
+        // Single click moves immediately
+        this.localPlayer.moveTo(pointer.worldX, pointer.worldY);
+      } else if (pointer.pointerType === "touch") {
+        // For touch: detect double tap
 
-      // Touch or left-click
-      this.localPlayer.moveTo(pointer.worldX, pointer.worldY);
+        const currentTime = this.time.now; // Phaser timer
+        const pos = { x: pointer.worldX, y: pointer.worldY };
+
+        if (
+          this.lastTapTime &&
+          currentTime - this.lastTapTime < this.doubleTapThreshold &&
+          Phaser.Math.Distance.Between(
+            pos.x,
+            pos.y,
+            this.lastTapPosition.x,
+            this.lastTapPosition.y
+          ) < this.tapDistanceThreshold
+        ) {
+          // Double tap detected, move player
+          this.localPlayer.moveTo(pos.x, pos.y);
+          // Reset last tap to avoid triple tap triggering
+          this.lastTapTime = 0;
+          this.lastTapPosition = null;
+        } else {
+          // Not a double tap, save current tap info
+          this.lastTapTime = currentTime;
+          this.lastTapPosition = pos;
+        }
+      }
     });
 
     this.setupSocketEvents();
