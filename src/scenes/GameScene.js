@@ -156,7 +156,8 @@ export default class GameScene extends Phaser.Scene {
       // Remove players no longer on server
       for (const id in this.players) {
         if (!players[id]) {
-          this.players[id].destroy();
+          this.players[id].sprite.destroy();
+          this.players[id].nameText.destroy();
           delete this.players[id];
         }
       }
@@ -164,7 +165,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.socket.on("playerDisconnected", (id) => {
       if (this.players[id]) {
-        this.players[id].destroy();
+        this.players[id].sprite.destroy();
+        this.players[id].nameText.destroy();
         delete this.players[id];
       }
     });

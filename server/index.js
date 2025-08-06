@@ -23,6 +23,7 @@ io.on("connection", (socket) => {
     const hash = await bcrypt.hash(password, 10);
     users[username] = { password: hash, socketId: socket.id };
     socket.emit("authSuccess");
+    console.log("Player Joined World:", username);
   });
 
   socket.on("login", async ({ username, password }) => {
