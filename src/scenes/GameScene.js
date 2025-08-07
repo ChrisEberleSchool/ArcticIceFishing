@@ -81,6 +81,33 @@ export default class GameScene extends Phaser.Scene {
     const myImageSprite1 = this.add.sprite(x, y + 150, "dena");
     myImageSprite1.setOrigin(originX, originY);
     myImageSprite1.setDisplaySize(width, height);
+
+    const chatInput = document.getElementById("chat-input");
+    chatInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && chatInput.value.trim() !== "") {
+        console.log("Sending chat message:", chatInput.value); // ← Add this
+        this.socket.emit("chatMessage", {
+          username,
+          message: chatInput.value.trim(),
+        });
+        chatInput.value = "";
+      }
+    });
+
+    // Listen for incoming chat messages
+    this.socket.on("chatMessage", ({ username, message }) => {
+      const chatLog = document.getElementById("chat-log");
+      const msgElement = document.createElement("div");
+      msgElement.textContent = `${username}: ${message}`;
+      chatLog.appendChild(msgElement);
+      chatLog.scrollTop = chatLog.scrollHeight; // auto-scroll
+    });
+
+    this.input.keyboard.on("keydown", (event) => {
+      if (document.activeElement === chatInput) {
+        event.stopPropagation(); // prevent Phaser from receiving input
+      }
+    });
   }
 
   update() {

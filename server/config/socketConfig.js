@@ -22,6 +22,17 @@ export default function socketConfig(io) {
       socket.emit("fishingHoleUpdate", { x, y, occupiedBy: fishingHoles[key] });
     }
 
+    // Listen for chat messages
+    socket.on("chatMessage", ({ username, message }) => {
+      console.log("Received chat:", username, message); // ← Add this
+      if (typeof message === "string" && message.trim().length > 0) {
+        io.emit("chatMessage", {
+          username: username || "Unknown",
+          message: message.trim().slice(0, 200),
+        });
+      }
+    });
+
     socket.on("disconnect", () => {
       fishingOnDisconnect(socket, io);
       playerOnDisconnect(socket, io);
