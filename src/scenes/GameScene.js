@@ -21,6 +21,9 @@ export default class GameScene extends Phaser.Scene {
     this.load.image("tiles", "./assets/mapAssets/spritesheet.png");
     this.load.tilemapTiledJSON("map1", "./assets/mapAssets/map1.json");
     Player.preload(this);
+
+    this.load.image("spenn", "./assets/Spen.png"); // load your PNG file
+    this.load.image("dena", "./assets/Dena.png"); // load your PNG file
   }
 
   create(data) {
@@ -64,6 +67,20 @@ export default class GameScene extends Phaser.Scene {
     this.socket.emit("initPlayer", { username });
 
     this.fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+
+    const x = -20;
+    const y = 150;
+    const originX = 0.5; // center horizontally
+    const originY = 0.5; // center vertically
+    const width = 40; // desired width in pixels
+    const height = 150; // desired height in pixels
+
+    const myImageSprite = this.add.sprite(x, y, "spenn");
+    myImageSprite.setOrigin(originX, originY);
+    myImageSprite.setDisplaySize(width, height);
+    const myImageSprite1 = this.add.sprite(x, y + 150, "dena");
+    myImageSprite1.setOrigin(originX, originY);
+    myImageSprite1.setDisplaySize(width, height);
   }
 
   update() {
