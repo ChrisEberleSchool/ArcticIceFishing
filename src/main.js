@@ -10,17 +10,20 @@ const config = {
   height: sizes.height,
   canvas: document.getElementById("gameCanvas"),
   pixelArt: true,
+  roundPixels: true,
   physics: {
     default: "arcade",
     arcade: {
       gravity: { y: 0 },
-      debug: false,
+      debug: true,
     },
   },
   scene: [GameScene],
 };
 
-// Handle login/signup form
+// Create the Phaser game once on page load
+const game = new Phaser.Game(config);
+
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -33,15 +36,13 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
   const authEvent = isSignup ? "signup" : "login";
   socket.emit(authEvent, { username, password });
 
-  // ✅ Auth success handler (for both login & signup)
   socket.once("authSuccess", (data) => {
-    // `data.username` might be undefined if server didn't send it — fallback
     const uname = data?.username || username;
 
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("gameCanvas").style.display = "block";
 
-    const game = new Phaser.Game(config);
+    // Start the game scene with username data
     game.scene.start("scene-game", { username: uname });
   });
 
