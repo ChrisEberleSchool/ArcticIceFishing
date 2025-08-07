@@ -27,8 +27,12 @@ export default class FishingTileEvents {
     // Listen for occupation success (only for this player)
     this.socket.on("occupySuccess", ({ x, y }) => {
       this.player.fishing = true;
-      this.player.currentFishingTile = { x, y };
-      this.player.stopMoving();
+      const tile = this.worldGrid.getFishingTileAt(x, y);
+      if (tile) {
+        this.player.currentFishingTile = tile;
+        this.player.stopMoving();
+        this.player.startFishing(tile);
+      }
     });
 
     // Listen for occupation failure (only for this player)
@@ -54,7 +58,7 @@ export default class FishingTileEvents {
 
   releaseFishingTile() {
     if (!this.player.currentFishingTile) return;
-    const { x, y } = this.player.currentFishingTile;
+    const { x, y } = this.player.currentFishingTile.GridPos;
     this.socket.emit("releaseFishingHole", { x, y });
     this.player.fishing = false;
     this.player.currentFishingTile = null;

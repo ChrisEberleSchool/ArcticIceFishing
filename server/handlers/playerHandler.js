@@ -14,10 +14,13 @@ export default function playerHandler(socket, io) {
     socket.broadcast.emit("newPlayer", players[socket.id]);
   });
 
-  socket.on("playerMovement", ({ x, y }) => {
+  socket.on("playerMovement", ({ x, y, fishing, fishingState, facing }) => {
     if (players[socket.id]) {
       players[socket.id].x = x;
       players[socket.id].y = y;
+      players[socket.id].fishing = fishing;
+      players[socket.id].fishingState = fishingState;
+      players[socket.id].facing = facing;
     }
   });
 }
