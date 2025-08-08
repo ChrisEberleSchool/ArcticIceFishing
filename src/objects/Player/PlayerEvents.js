@@ -1,6 +1,7 @@
-import RemotePlayer from "./RemotePlayer";
+import Player from "./Player.js"; // import Player for local player creation if needed
+import RemotePlayer from "./RemotePlayer.js";
 
-// This function creates and stores a remote player instance
+// Helper: Add a remote player to scene.players
 function addOtherPlayer(scene, id, info) {
   const remotePlayer = new RemotePlayer(scene, info.x, info.y, info.username);
   scene.players[id] = remotePlayer;
@@ -8,15 +9,24 @@ function addOtherPlayer(scene, id, info) {
 
 export default function registerPlayerEvents(scene, socket) {
   socket.on("currentPlayers", (players) => {
-    for (const id in players) {
-      if (id !== socket.id && !scene.players[id]) {
-        addOtherPlayer(scene, id, players[id]);
+    Object.entries(players).forEach(([id, playerData]) => {
+      if (id === socket.id) {
+        // Skip local player since it's already created
+        return;
       }
-    }
+
+      if (!scene.players[id]) {
+        addOtherPlayer(scene, id, playerData);
+      } else {
+        // Update existing remote player position
+        scene.players[id].sprite.x = playerData.x;
+        scene.players[id].sprite.y = playerData.y;
+      }
+    });
   });
 
   socket.on("newPlayer", (playerInfo) => {
-    if (!scene.players[playerInfo.id]) {
+    if (!scene.players[playerInfo.id] && playerInfo.id !== socket.id) {
       addOtherPlayer(scene, playerInfo.id, playerInfo);
     }
   });
@@ -37,7 +47,7 @@ export default function registerPlayerEvents(scene, socket) {
 
   socket.on("playerDisconnected", (id) => {
     if (scene.players[id]) {
-      scene.players[id].destroy(); // ✅ use class method
+      scene.players[id].destroy();
       delete scene.players[id];
     }
   });

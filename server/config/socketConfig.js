@@ -8,6 +8,8 @@ import fishingHandler, {
 } from "../handlers/fishingHandler.js";
 import { fishingHoles } from "../state/fishingHoles.js";
 
+import chatHandler from "../handlers/chatHandler.js";
+
 export default function socketConfig(io) {
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
@@ -15,23 +17,14 @@ export default function socketConfig(io) {
     authHandler(socket, io);
     playerHandler(socket, io);
     fishingHandler(socket, io);
+    chatHandler(socket, io);
 
+    // TODO :: Remove this
     // Send initial fishing holes state to the newly connected player
     for (const key in fishingHoles) {
       const [x, y] = key.split(",").map(Number);
       socket.emit("fishingHoleUpdate", { x, y, occupiedBy: fishingHoles[key] });
     }
-
-    // Listen for chat messages
-    socket.on("chatMessage", ({ username, message }) => {
-      console.log("Received chat:", username, message); // ← Add this
-      if (typeof message === "string" && message.trim().length > 0) {
-        io.emit("chatMessage", {
-          username: username || "Unknown",
-          message: message.trim().slice(0, 200),
-        });
-      }
-    });
 
     socket.on("disconnect", () => {
       fishingOnDisconnect(socket, io);

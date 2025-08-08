@@ -1,7 +1,7 @@
 import "./style.css";
 import Phaser from "phaser";
 import GameScene from "./scenes/GameScene.js";
-import socket from "/network/socket.js";
+import socket from "./network/socket.js";
 import sizes from "./config/gameConfig.js";
 
 const config = {

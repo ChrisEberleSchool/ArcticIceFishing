@@ -206,6 +206,10 @@ export default class Player {
     });
   }
 
+  setPosition(x, y) {
+    this.sprite.setPosition(x, y);
+  }
+
   moveTo(x, y) {
     this.target = { x, y };
   }

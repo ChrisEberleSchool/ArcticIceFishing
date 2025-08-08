@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import socket from "/network/socket.js";
+import socket from "../network/socket.js";
 import Player from "../objects/Player/Player.js";
 import RemotePlayer from "../objects/Player/RemotePlayer.js";
 import registerPlayerEvents from "../objects/Player/PlayerEvents.js";
@@ -30,6 +30,8 @@ export default class GameScene extends Phaser.Scene {
     const username = data?.username;
     if (!username) {
       console.error("Missing username, cannot initialize player.");
+      // Instead of returning early, you could pause the scene so nothing runs:
+      this.scene.pause();
       return;
     }
 
@@ -54,6 +56,15 @@ export default class GameScene extends Phaser.Scene {
       username,
       this.socket
     );
+
+    this.socket.on("currentPlayers", (players) => {
+      const playerData = Object.values(players).find(
+        (p) => p.username === username
+      );
+      if (playerData && this.localPlayer) {
+        this.localPlayer.setPosition(playerData.x, playerData.y);
+      }
+    });
 
     this.input.mouse.disableContextMenu();
     this.input.addPointer(2);
