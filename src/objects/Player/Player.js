@@ -22,6 +22,7 @@ export default class Player {
     this.NameTagOffset = 24;
     this.distToTarget = 3;
     this.facing = "down";
+    this.isMoving = false;
 
     this.fishingSession = null;
 
@@ -50,12 +51,13 @@ export default class Player {
     this.sprite.play("idle-down");
 
     this.nameText = scene.add
-      .text(x, y - this.NameTagOffset, username, {
-        fontSize: "12px",
-        color: "#ffffff",
-        fontFamily: "Arial",
-        stroke: "#000",
-        strokeThickness: 3,
+      .text(x, y - 24, username.toUpperCase(), {
+        fontSize: "10px",
+        color: "#00ffff", // neon cyan-ish
+        fontFamily: "'Orbitron', monospace", // sci-fi style font
+        stroke: "#003344",
+        strokeThickness: 2,
+        letterSpacing: 1.5,
       })
       .setOrigin(0.5);
 
@@ -68,11 +70,12 @@ export default class Player {
         this.sprite.y + this.NameTagOffset,
         "Press F to Start Fishing!",
         {
-          fontSize: "12px",
-          color: "#ffffff",
-          fontFamily: "Arial",
-          stroke: "#000",
-          strokeThickness: 3,
+          fontSize: "8px",
+          color: "#00ffff", // neon cyan-ish
+          fontFamily: "'Orbitron', monospace", // sci-fi style font
+          stroke: "#003344",
+          strokeThickness: 2,
+          letterSpacing: 1,
         }
       )
       .setOrigin(0.5);
@@ -275,12 +278,14 @@ export default class Player {
     if (this.fishing) {
       // Already fishing, do nothing
       this.stopMoving();
+      this.isMoving = false;
       this.updateAnimation();
       return;
     }
 
     if (!this.target) {
       this.sprite.setVelocity(0, 0);
+      this.isMoving = false;
       this.updateFacing();
       this.updateAnimation();
       return;
@@ -296,6 +301,7 @@ export default class Player {
     if (dist < this.distToTarget) {
       this.sprite.setVelocity(0, 0);
       this.target = null;
+      this.isMoving = false;
     } else {
       const angle = Phaser.Math.Angle.Between(
         this.sprite.x,
@@ -306,6 +312,7 @@ export default class Player {
       const vx = Math.cos(angle) * this.speed;
       const vy = Math.sin(angle) * this.speed;
       this.sprite.setVelocity(vx, vy);
+      this.isMoving = true;
     }
 
     this.updateFacing();
@@ -371,53 +378,6 @@ export default class Player {
 
     this.updateAnimation();
   }
-  startFishingLoop() {
-    const loop = () => {
-      if (!this.fishing) return;
-
-      // Start in idle state
-      this.fishingState = "idle";
-      this.updateAnimation();
-
-      // Wait 5–10 seconds before a fish starts fighting
-      this.fishingTimer = this.scene.time.addEvent({
-        delay: Phaser.Math.Between(5000, 10000), // 5–10 sec
-        callback: () => {
-          if (!this.fishing) return;
-
-          // Transition to fight
-          this.fishingState = "fight";
-          this.updateAnimation();
-
-          // Simulate 10-second fight duration
-          this.fishingTimer = this.scene.time.addEvent({
-            delay: 10000, // 10 sec
-            callback: () => {
-              if (!this.fishing) return;
-
-              // Fish is caught!
-              this.fishingState = "caught";
-              this.updateAnimation();
-
-              // Play caught animation for 5 seconds
-              this.fishingTimer = this.scene.time.addEvent({
-                delay: 5000,
-                callback: () => {
-                  if (!this.fishing) return;
-
-                  // Go back to idle and loop again
-                  loop();
-                },
-              });
-            },
-          });
-        },
-      });
-    };
-
-    loop();
-  }
-
   // ANIMATION RELATED METHODS
   updateFacing() {
     const velocity = this.sprite.body.velocity;

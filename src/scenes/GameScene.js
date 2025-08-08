@@ -166,8 +166,7 @@ export default class GameScene extends Phaser.Scene {
       fishing: this.localPlayer.fishing,
       fishingState: this.localPlayer.fishingState,
       facing: this.localPlayer.facing,
-      coins: this.localPlayer.coins,
-      fishCaught: this.localPlayer.fishCaught,
+      isMoving: this.localPlayer.isMoving,
     });
 
     const now = performance.now();

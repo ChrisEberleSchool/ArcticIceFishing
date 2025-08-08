@@ -1,7 +1,9 @@
 import authHandler from "../handlers/authHandler.js";
 import playerHandler, {
   onDisconnect as playerOnDisconnect,
+  startPeriodicCleanup,
 } from "../handlers/playerHandler.js";
+import { players } from "../state/players.js";
 
 import fishingHandler, {
   onDisconnect as fishingOnDisconnect,
@@ -32,8 +34,9 @@ export default function socketConfig(io) {
     });
   });
 
+  startPeriodicCleanup(io);
+
   setInterval(async () => {
-    const { players } = await import("../state/players.js");
     io.emit("playersUpdate", players);
-  }, 50);
+  }, 100);
 }

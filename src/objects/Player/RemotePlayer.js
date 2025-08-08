@@ -7,6 +7,7 @@ export default class RemotePlayer {
     this.facing = "down";
     this.target = { x, y };
     this.smoothFactor = 0.1;
+    this.isMoving = this.isMoving;
 
     this.sprite = scene.add
       .sprite(x, y, "playerIdleSheet")
@@ -15,12 +16,13 @@ export default class RemotePlayer {
     this.sprite.play("idle");
 
     this.nameText = scene.add
-      .text(x, y - 24, username, {
+      .text(x, y - 24, username.toUpperCase(), {
         fontSize: "12px",
-        color: "#ffffff",
-        fontFamily: "Arial",
-        stroke: "#000",
-        strokeThickness: 3,
+        color: "#00ffff", // neon cyan-ish
+        fontFamily: "'Orbitron', monospace", // sci-fi style font
+        stroke: "#003344",
+        strokeThickness: 4,
+        letterSpacing: 2,
       })
       .setOrigin(0.5);
   }
@@ -30,6 +32,7 @@ export default class RemotePlayer {
     this.fishing = data.fishing;
     this.fishingState = data.fishingState;
     this.facing = data.facing;
+    this.isMoving = data.isMoving;
   }
 
   update() {
@@ -59,17 +62,7 @@ export default class RemotePlayer {
   updateAnimation() {
     if (this.fishing) {
       if (this.fishingState === "cast") {
-        if (
-          !this.sprite.anims.isPlaying ||
-          this.sprite.anims.currentAnim.key !== "fishing-cast-right"
-        ) {
-          this.sprite.anims.play("fishing-cast-right");
-          this.sprite.once("animationcomplete", () => {
-            if (this.fishing && this.fishingState === "cast") {
-              this.fishingState = "idle"; // auto-transition to idle after cast
-            }
-          });
-        }
+        this.sprite.anims.play("fishing-cast-right", true);
         return;
       } else if (this.fishingState === "idle") {
         this.sprite.anims.play("fishing-idle-right", true);
@@ -77,13 +70,20 @@ export default class RemotePlayer {
       } else if (this.fishingState === "fight") {
         this.sprite.anims.play("fishing-fight-right", true);
         return;
+      } else if (this.fishingState === "caught") {
+        this.sprite.anims.play("fishing-caught-right", true);
+        return;
       }
+      return;
     }
 
-    // Default idle animation based on facing direction
-    this.sprite.anims.play(`idle-${this.facing}`, true);
+    // This code will not re reached if fishing is true
+    if (!this.isMoving) {
+      this.sprite.anims.play(`idle-${this.facing}`, true);
+    } else {
+      this.sprite.anims.play(`walk-${this.facing}`, true);
+    }
   }
-
   destroy() {
     this.sprite.destroy();
     this.nameText.destroy();

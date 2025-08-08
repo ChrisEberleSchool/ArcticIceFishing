@@ -40,16 +40,20 @@ export default function playerHandler(socket, io) {
   });
 
   // Update player position/fishing state/facing in memory only
-  socket.on("playerMovement", ({ x, y, fishing, fishingState, facing }) => {
-    const player = players[socket.id];
-    if (!player) return;
+  socket.on(
+    "playerMovement",
+    ({ x, y, fishing, fishingState, facing, isMoving }) => {
+      const player = players[socket.id];
+      if (!player) return;
 
-    player.x = x;
-    player.y = y;
-    player.fishing = fishing;
-    player.fishingState = fishingState;
-    player.facing = facing;
-  });
+      player.x = x;
+      player.y = y;
+      player.fishing = fishing;
+      player.fishingState = fishingState;
+      player.facing = facing;
+      player.isMoving = isMoving;
+    }
+  );
 
   // These calls can be throttled
   socket.on("playerStats", ({ coins, fishCaught }) => {
@@ -91,4 +95,65 @@ export async function onDisconnect(socket, io) {
 
   io.emit("playerDisconnected", socket.id);
   console.log(`Player disconnected: ${player.username}`);
+}
+
+// Run cleanup every 30 seconds
+let cleanupStarted = false;
+export function startPeriodicCleanup(io) {
+  if (cleanupStarted) return;
+  cleanupStarted = true;
+
+  setInterval(async () => {
+    try {
+      console.log("Running periodic cleanup of stale users/players...");
+
+      const activeSocketIds = new Set([...io.sockets.sockets.keys()]); // all currently connected socket ids
+
+      // Check players for stale sockets
+      for (const socketId of Object.keys(players)) {
+        if (!activeSocketIds.has(socketId)) {
+          const player = players[socketId];
+
+          // Save player data before removal
+          try {
+            await prisma.user.update({
+              where: { username: player.username },
+              data: {
+                x: player.x,
+                y: player.y,
+                coins: player.coins,
+                fishCaught: player.fishCaught,
+              },
+            });
+            console.log(
+              `Saved player data for ${player.username} during cleanup.`
+            );
+          } catch (err) {
+            console.error(
+              `Failed to save player data for ${player.username} during cleanup:`,
+              err
+            );
+          }
+
+          // Delete from players map
+          delete players[socketId];
+
+          // Delete from users map if it matches this socketId
+          if (
+            users[player.username] &&
+            users[player.username].socketId === socketId
+          ) {
+            delete users[player.username];
+            console.log(`Freed username: ${player.username} during cleanup.`);
+          }
+
+          // Notify clients about disconnection
+          io.emit("playerDisconnected", socketId);
+          console.log(`Cleaned up disconnected player: ${player.username}`);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to emit players update:", err);
+    }
+  }, 30000);
 }
