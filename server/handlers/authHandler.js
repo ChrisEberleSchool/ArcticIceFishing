@@ -2,6 +2,9 @@ import bcrypt from "bcrypt";
 import prisma from "../db/prismaClient.js";
 import { users } from "../state/users.js"; // Still used to map socketId in memory
 
+// Toggle this to enable/disable password hashing
+const USE_ENCRYPTION = false;
+
 export default function authHandler(socket, io) {
   // SIGNUP
   socket.on("signup", async ({ username, password }) => {
@@ -18,19 +21,22 @@ export default function authHandler(socket, io) {
         return socket.emit("authError", "Username already exists");
       }
 
-      // Hash password & create user
-      const hash = await bcrypt.hash(password, 10);
+      let storedPassword;
+      if (USE_ENCRYPTION) {
+        storedPassword = await bcrypt.hash(password, 10);
+      } else {
+        storedPassword = password; // plaintext
+      }
+
       const newUser = await prisma.user.create({
         data: {
           username,
-          password: hash,
-          // x, y, coins, fishCaught will use default values
+          password: storedPassword,
         },
       });
 
-      // Track active user in memory (for sockets)
       users[username] = {
-        password: hash,
+        password: storedPassword,
         socketId: socket.id,
       };
 
@@ -54,14 +60,19 @@ export default function authHandler(socket, io) {
         return socket.emit("authError", "User not found");
       }
 
-      const valid = await bcrypt.compare(password, user.password);
+      let valid;
+      if (USE_ENCRYPTION) {
+        valid = await bcrypt.compare(password, user.password);
+      } else {
+        valid = password === user.password;
+      }
+
       if (!valid) {
         return socket.emit("authError", "Incorrect password");
       }
 
-      // Track active user in memory
       users[username] = {
-        password: user.password, // hashed
+        password: user.password,
         socketId: socket.id,
       };
 
