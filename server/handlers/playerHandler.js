@@ -5,19 +5,16 @@ import prisma from "../db/prismaClient.js";
 
 export default function playerHandler(socket, io) {
   socket.on("initPlayer", async ({ username }) => {
-    // Validate session
     if (!users[username] || users[username].socketId !== socket.id) {
       return socket.emit("authError", "Unauthorized");
     }
 
     try {
-      // Load player from DB
       const dbUser = await prisma.user.findUnique({ where: { username } });
       if (!dbUser) {
         return socket.emit("authError", "User not found in DB");
       }
 
-      // Register player using DB position
       players[socket.id] = {
         id: socket.id,
         username,
@@ -26,15 +23,13 @@ export default function playerHandler(socket, io) {
         fishing: false,
         fishingState: null,
         facing: "down",
-        coins: dbUser.coins,
-        fishCaught: dbUser.fishCaught,
+        coins: dbUser.coins ?? 0,
+        fishCaught: dbUser.fishCaught ?? 0,
       };
 
-      // Send game state to this player
       socket.emit("currentPlayers", players);
       socket.emit("currentFishingHoles", fishingHoles);
 
-      // Notify other players
       socket.broadcast.emit("newPlayer", players[socket.id]);
 
       console.log(`Initialized player: ${username}`);
@@ -44,37 +39,56 @@ export default function playerHandler(socket, io) {
     }
   });
 
-  socket.on(
-    "playerMovement",
-    async ({ x, y, fishing, fishingState, facing }) => {
-      const player = players[socket.id];
-      if (!player) return;
+  // Update player position/fishing state/facing in memory only
+  socket.on("playerMovement", ({ x, y, fishing, fishingState, facing }) => {
+    const player = players[socket.id];
+    if (!player) return;
 
-      player.x = x;
-      player.y = y;
-      player.fishing = fishing;
-      player.fishingState = fishingState;
-      player.facing = facing;
+    player.x = x;
+    player.y = y;
+    player.fishing = fishing;
+    player.fishingState = fishingState;
+    player.facing = facing;
+  });
 
-      // Optionally update position in DB
-      try {
-        await prisma.user.update({
-          where: { username: player.username },
-          data: { x, y },
-        });
-      } catch (err) {
-        console.error("Failed to update player position in DB:", err);
-      }
-    }
-  );
+  // These calls can be throttled
+  socket.on("playerStats", ({ coins, fishCaught }) => {
+    const player = players[socket.id];
+    if (!player) return;
+
+    player.coins = coins;
+    player.fishCaught = fishCaught;
+  });
 }
 
-// Handle disconnection
-export function onDisconnect(socket, io) {
-  if (players[socket.id]) {
-    const username = players[socket.id].username;
-    delete players[socket.id];
-    io.emit("playerDisconnected", socket.id);
-    console.log(`Player disconnected: ${username}`);
+// On disconnect, save all player data to DB
+export async function onDisconnect(socket, io) {
+  const player = players[socket.id];
+  if (!player) return;
+
+  try {
+    await prisma.user.update({
+      where: { username: player.username },
+      data: {
+        x: player.x,
+        y: player.y,
+        coins: player.coins,
+        fishCaught: player.fishCaught,
+      },
+    });
+    console.log(`Saved player data for ${player.username} on disconnect.`);
+  } catch (err) {
+    console.error("Failed to save player data on disconnect:", err);
   }
+
+  delete players[socket.id];
+
+  // **Remove user from the users map**
+  if (users[player.username] && users[player.username].socketId === socket.id) {
+    delete users[player.username];
+    console.log(`Freed username: ${player.username}`);
+  }
+
+  io.emit("playerDisconnected", socket.id);
+  console.log(`Player disconnected: ${player.username}`);
 }

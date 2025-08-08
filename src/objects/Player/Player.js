@@ -1,4 +1,5 @@
 import FishingTileEvents from "../Map/FishingTileEvents";
+import FishingSession from "../Map/fishing/FishingSession.js";
 
 //locomotion
 const ANIM_IDLE_FRAMERATE = 4;
@@ -9,10 +10,12 @@ const ANIM_FISHING_IDLE_FRAMERATE = 2;
 const ANIM_FISHING_FIGHT_FRAMERATE = 6;
 
 export default class Player {
-  constructor(scene, x, y, username, socket) {
+  constructor(scene, x, y, username, socket, coins, fishCaught) {
     this.scene = scene;
     this.username = username;
     this.socket = socket;
+    this.coins = coins;
+    this.fishCaught = fishCaught;
     this.target = null;
     this.speed = 130;
     this.fishing = false;
@@ -20,6 +23,9 @@ export default class Player {
     this.distToTarget = 3;
     this.facing = "down";
 
+    this.fishingSession = null;
+
+    this.fishingTimer = null;
     this.fishingState = null; // "cast", "idle", "fight"
     this.currentFishingTile = null;
     this.fishingTileEvents = new FishingTileEvents(
@@ -28,6 +34,7 @@ export default class Player {
       scene.worldGrid,
       this
     );
+
     this.fKey = this.scene.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.F
     );
@@ -40,7 +47,7 @@ export default class Player {
       .sprite(x, y, "playerIdleSheet")
       .setOrigin(0.5)
       .setScale(0.8);
-    this.sprite.play("idle");
+    this.sprite.play("idle-down");
 
     this.nameText = scene.add
       .text(x, y - this.NameTagOffset, username, {
@@ -99,6 +106,8 @@ export default class Player {
         frameHeight: 128,
       }
     );
+
+    FishingSession.preload(scene);
   }
 
   static createAnimations(scene) {
@@ -199,7 +208,16 @@ export default class Player {
     scene.anims.create({
       key: "fishing-fight-right",
       frames: scene.anims.generateFrameNumbers("playerFishingSheet", {
-        frames: [48, 49, 50],
+        frames: [46, 47, 48],
+      }),
+      frameRate: ANIM_FISHING_FIGHT_FRAMERATE,
+      repeat: -1,
+    });
+
+    scene.anims.create({
+      key: "fishing-caught-right",
+      frames: scene.anims.generateFrameNumbers("playerFishingSheet", {
+        frames: [50, 51],
       }),
       frameRate: ANIM_FISHING_FIGHT_FRAMERATE,
       repeat: -1,
@@ -219,6 +237,10 @@ export default class Player {
   }
 
   update() {
+    // initial setting of position
+    this.nameText.x = this.sprite.x;
+    this.nameText.y = this.sprite.y - this.NameTagOffset;
+
     const { x: gridX, y: gridY } = this.scene.worldGrid.WorldCoordinatesToGrid(
       this.x,
       this.y
@@ -226,6 +248,7 @@ export default class Player {
     const fishingTile = this.scene.worldGrid.getFishingTileAt(gridX, gridY);
 
     if (fishingTile && !this.fishing) {
+      this.stopFishing();
       if (fishingTile.isOccupied) {
         this.interactText.setText("Hole is Occupied");
       } else {
@@ -285,9 +308,6 @@ export default class Player {
       this.sprite.setVelocity(vx, vy);
     }
 
-    this.nameText.x = this.sprite.x;
-    this.nameText.y = this.sprite.y - this.NameTagOffset;
-
     this.updateFacing();
     this.updateAnimation();
   }
@@ -300,55 +320,102 @@ export default class Player {
   startFishing(fishingTile) {
     if (!fishingTile) return;
 
+    // Stop any existing fishing session to avoid doubling timers
+    if (this.fishingSession) {
+      this.fishingSession.stop();
+      this.fishingSession = null;
+    }
+
     const xOffset = -18;
     const yOffset = -18;
 
-    // Get world position of fishing tile center
     const { x, y } = this.scene.worldGrid.GridCoordinatesToWorld(
       fishingTile.GridPos.x,
       fishingTile.GridPos.y
     );
 
-    // Move player to the hole position + offset
     this.sprite.x = x + xOffset;
     this.sprite.y = y + yOffset;
 
     this.nameText.x = this.sprite.x;
     this.nameText.y = this.sprite.y - this.NameTagOffset;
 
-    // Stop any velocity
     this.stopMoving();
 
-    // Face down
     this.facing = "right";
-    // Set fishing state
     this.fishing = true;
-    this.fishingState = "cast";
     this.currentFishingTile = fishingTile;
 
-    // 🎣 Start by playing the casting animation once
-    this.sprite.anims.play("fishing-cast-right");
-
-    // 🧹 Remove any previous listener to avoid duplicates
-    this.sprite.off("animationcomplete");
-
-    // 🎬 When casting finishes, go into idle fishing animation
-    this.sprite.on("animationcomplete", (anim) => {
-      if (anim.key === "fishing-cast-right" && this.fishing) {
-        this.fishingState = "idle"; // 🔄 transition to idle
-      }
-    });
-
-    // Play correct animation
-    this.updateAnimation();
+    // Create and start a new FishingSession
+    this.fishingSession = new FishingSession(this.scene, this, fishingTile);
   }
 
   stopFishing() {
-    if (this.fishing && this.currentFishingTile) {
+    if (!this.fishing) return;
+
+    // Clear fishing session and its timers to prevent doubling
+    if (this.fishingSession) {
+      this.fishingSession.stop();
+      this.fishingSession = null;
+    }
+
+    if (this.currentFishingTile) {
       this.fishingTileEvents.releaseFishingTile();
-      this.fishing = false;
       this.currentFishingTile = null;
     }
+
+    this.fishing = false;
+    this.fishingState = null;
+    this.target = null;
+    this.sprite.setVelocity(0, 0);
+
+    this.updateAnimation();
+  }
+  startFishingLoop() {
+    const loop = () => {
+      if (!this.fishing) return;
+
+      // Start in idle state
+      this.fishingState = "idle";
+      this.updateAnimation();
+
+      // Wait 5–10 seconds before a fish starts fighting
+      this.fishingTimer = this.scene.time.addEvent({
+        delay: Phaser.Math.Between(5000, 10000), // 5–10 sec
+        callback: () => {
+          if (!this.fishing) return;
+
+          // Transition to fight
+          this.fishingState = "fight";
+          this.updateAnimation();
+
+          // Simulate 10-second fight duration
+          this.fishingTimer = this.scene.time.addEvent({
+            delay: 10000, // 10 sec
+            callback: () => {
+              if (!this.fishing) return;
+
+              // Fish is caught!
+              this.fishingState = "caught";
+              this.updateAnimation();
+
+              // Play caught animation for 5 seconds
+              this.fishingTimer = this.scene.time.addEvent({
+                delay: 5000,
+                callback: () => {
+                  if (!this.fishing) return;
+
+                  // Go back to idle and loop again
+                  loop();
+                },
+              });
+            },
+          });
+        },
+      });
+    };
+
+    loop();
   }
 
   // ANIMATION RELATED METHODS
@@ -374,6 +441,9 @@ export default class Player {
       } else if (this.fishingState === "fight") {
         this.sprite.anims.play(`fishing-fight-right`, true);
         return;
+      } else if (this.fishingState === "caught") {
+        this.sprite.anims.play(`fishing-caught-right`, true);
+        return;
       }
     }
 
@@ -383,6 +453,17 @@ export default class Player {
       this.sprite.anims.play(`idle-${this.facing}`, true);
     } else {
       this.sprite.anims.play(`walk-${this.facing}`, true);
+    }
+  }
+
+  addCoins(amount) {
+    this.coins += amount;
+    // Optionally clamp to 0 minimum:
+    if (this.coins < 0) this.coins = 0;
+
+    // Notify the scene (or whoever owns the UI) that coins changed:
+    if (this.scene && this.scene.updateCoinText) {
+      this.scene.updateCoinText(this.coins);
     }
   }
 

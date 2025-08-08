@@ -54,6 +54,11 @@ export default function authHandler(socket, io) {
       return socket.emit("authError", "Missing fields");
     }
 
+    // 1. Check if user already logged in on another socket
+    if (users[username] && users[username].socketId !== socket.id) {
+      return socket.emit("authError", "User already logged in");
+    }
+
     try {
       const user = await prisma.user.findUnique({ where: { username } });
       if (!user) {

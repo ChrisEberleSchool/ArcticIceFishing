@@ -18,7 +18,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [GameScene],
+  scene: [],
 };
 
 // Create the Phaser game once on page load
@@ -42,8 +42,12 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("gameCanvas").style.display = "block";
 
-    // Start the game scene with username data
-    game.scene.start("scene-game", { username: uname });
+    if (!game.scene.getScene("scene-game")) {
+      game.scene.add("scene-game", GameScene, true, { username: uname });
+    } else {
+      // Scene already exists, just start it or restart it
+      game.scene.start("scene-game", { username: uname });
+    }
   });
 
   socket.once("authError", (msg) => {

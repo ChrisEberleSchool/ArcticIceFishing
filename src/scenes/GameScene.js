@@ -4,6 +4,7 @@ import Player from "../objects/Player/Player.js";
 import RemotePlayer from "../objects/Player/RemotePlayer.js";
 import registerPlayerEvents from "../objects/Player/PlayerEvents.js";
 import WorldGrid from "../objects/Map/WorldGrid.js";
+import InputManager from "../objects/InputManager.js";
 
 const TILE_SIZE = 32;
 const PLAYER_SPAWN_POINT = { x: 250, y: 250 };
@@ -24,6 +25,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image("spenn", "./assets/Spen.png"); // load your PNG file
     this.load.image("dena", "./assets/Dena.png"); // load your PNG file
+
+    // gold coin ui
+    this.load.image("coin", "./assets/ui/coin.png");
   }
 
   create(data) {
@@ -54,7 +58,9 @@ export default class GameScene extends Phaser.Scene {
       PLAYER_SPAWN_POINT.x,
       PLAYER_SPAWN_POINT.y,
       username,
-      this.socket
+      this.socket,
+      0,
+      0
     );
 
     this.socket.on("currentPlayers", (players) => {
@@ -63,21 +69,17 @@ export default class GameScene extends Phaser.Scene {
       );
       if (playerData && this.localPlayer) {
         this.localPlayer.setPosition(playerData.x, playerData.y);
+        this.localPlayer.coins = playerData.coins;
+        this.localPlayer.fishCaught = playerData.fishCaught;
+        this.updateCoinText(this.localPlayer.coins);
       }
     });
 
-    this.input.mouse.disableContextMenu();
-    this.input.addPointer(2);
-    this.input.on("pointerdown", (pointer) => {
-      if (pointer.pointerType === "mouse" && pointer.rightButtonDown()) return;
-      this.localPlayer.moveTo(pointer.worldX, pointer.worldY);
-    });
+    this.inputManager = new InputManager(this, this.localPlayer);
 
     registerPlayerEvents(this, this.socket); // should internally use RemotePlayer
 
     this.socket.emit("initPlayer", { username });
-
-    this.fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
 
     const x = -20;
     const y = 150;
@@ -119,7 +121,39 @@ export default class GameScene extends Phaser.Scene {
         event.stopPropagation(); // prevent Phaser from receiving input
       }
     });
+
+    // Create container at (10, 10) in the viewport (fixed position)
+    this.coinContainer = this.add.container(400, 265).setScrollFactor(0);
+
+    const padding = 5; // space between icon and text
+
+    const coinIcon = this.add
+      .image(0, 0, "coin")
+      .setOrigin(0, 0.5) // top-left horizontally, vertically centered
+      .setScale(0.0575);
+
+    this.coinText = this.add
+      .text(coinIcon.displayWidth + padding, 0, "0", {
+        fontSize: "16px",
+        fontFamily: "Arial",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 3,
+      })
+      .setOrigin(0, 0.5);
+
+    this.coinContainer.add([coinIcon, this.coinText]);
   }
+
+  shutdown() {
+    this.inputManager.destroy();
+  }
+
+  updateCoinText(newCoinAmount) {
+    this.coinText.setText(newCoinAmount.toString());
+  }
+
+  lastMovementEmit = 0; // timestamp of last emit
 
   update() {
     if (!this.localPlayer) return;
@@ -132,7 +166,19 @@ export default class GameScene extends Phaser.Scene {
       fishing: this.localPlayer.fishing,
       fishingState: this.localPlayer.fishingState,
       facing: this.localPlayer.facing,
+      coins: this.localPlayer.coins,
+      fishCaught: this.localPlayer.fishCaught,
     });
+
+    const now = performance.now();
+    if (now - this.lastMovementEmit > 100) {
+      // 100ms interval
+      this.socket.emit("playerStats", {
+        coins: this.localPlayer.coins,
+        fishCaught: this.localPlayer.fishCaught,
+      });
+      this.lastMovementEmit = now;
+    }
 
     // Update remote players
     for (const id in this.players) {
