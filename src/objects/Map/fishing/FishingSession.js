@@ -14,7 +14,7 @@ export default class FishingSession {
     this.barWidth = 25;
 
     this.hookY = 0;
-    this.pullSpeed = 16.5;
+    this.pullSpeed = 2.8;
     this.catchAnimationDuration = 3000;
 
     this.player.fishing = true;
