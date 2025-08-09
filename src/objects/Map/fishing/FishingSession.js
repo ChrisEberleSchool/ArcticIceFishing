@@ -1,3 +1,5 @@
+import FishFactory from "./FishFactory.js";
+
 export default class FishingSession {
   constructor(scene, player, fishingTile) {
     this.scene = scene;
@@ -12,8 +14,7 @@ export default class FishingSession {
     this.barWidth = 25;
 
     this.hookY = 0;
-    this.fishSpeed = 0.5;
-    this.pullSpeed = 1.5;
+    this.pullSpeed = 16.5;
     this.catchAnimationDuration = 3000;
 
     this.player.fishing = true;
@@ -24,11 +25,14 @@ export default class FishingSession {
 
     this.catchTimer = null;
 
+    this.currentFish = null;
+
     this.start();
   }
 
   static preload(scene) {
     scene.load.image("fishHook", "./assets/ui/fishHook.png");
+    FishFactory.preloadAll(scene);
   }
 
   start() {
@@ -59,6 +63,8 @@ export default class FishingSession {
     this.clearTimers();
 
     console.log("Waiting for bite...");
+    this.player.fishingState = "idle";
+    this.player.updateAnimation();
 
     this.biteTimer = this.scene.time.delayedCall(
       Phaser.Math.Between(3000, 7000),
@@ -83,6 +89,14 @@ export default class FishingSession {
 
     if (this.minigameUI) this.minigameUI.destroy();
 
+    // Get fish based on player's current equipment
+    this.currentFish = FishFactory.getRandomFish(this.player.currentEquipment);
+    if (!this.currentFish) {
+      console.warn("No fish available for current equipment. Ending fight.");
+      this.endFight(false);
+      return;
+    }
+
     const x = this.player.x + 50;
     const y = this.player.y - 60;
     this.minigameUI = this.scene.add.container(x, y);
@@ -105,7 +119,10 @@ export default class FishingSession {
     // NO input event registration here anymore!
 
     this.tugEvent = this.scene.time.addEvent({
-      delay: Phaser.Math.Between(1000, 2000),
+      delay: Phaser.Math.Between(
+        1000 / this.currentFish.pullFrequency,
+        2000 / this.currentFish.pullFrequency
+      ),
       loop: true,
       callback: () => {
         this.isTugging = true;
@@ -122,12 +139,12 @@ export default class FishingSession {
   }
 
   updateFight() {
-    if (!this.hookSprite || !this.player.fishing) return;
+    if (!this.hookSprite || !this.player.fishing || !this.currentFish) return;
     const minY = -this.barHeight / 2 + 15;
     const maxY = this.barHeight / 2 - 15;
 
     if (this.isTugging) {
-      this.hookY += this.fishSpeed * 2;
+      this.hookY += this.currentFish.fishSpeed;
       this.hookSprite.setTint(0xff0000);
     } else {
       if (this.isMouseDown) this.hookY -= this.pullSpeed;
@@ -161,8 +178,10 @@ export default class FishingSession {
     }
 
     if (won) {
-      this.player.addCoins(100);
-      console.log("You caught the fish!");
+      this.player.addCoins(this.currentFish.reward);
+      console.log(
+        `You caught a ${this.currentFish.tier} ${this.currentFish.name} and earned ${this.currentFish.reward} coins!`
+      );
       this.player.fishingState = "caught";
       this.player.updateAnimation();
 
@@ -179,6 +198,9 @@ export default class FishingSession {
       this.player.updateAnimation();
       this.waitForBite();
     }
+
+    // Clear current fish when fight ends
+    this.currentFish = null;
   }
 
   clearTimers() {

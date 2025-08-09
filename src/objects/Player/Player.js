@@ -23,6 +23,7 @@ export default class Player {
     this.distToTarget = 3;
     this.facing = "down";
     this.isMoving = false;
+    this.currentEquipment = "basicRod";
 
     this.fishingSession = null;
 
