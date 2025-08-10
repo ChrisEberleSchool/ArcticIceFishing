@@ -13,24 +13,22 @@ export default class Fish {
     spriteKey,
     spritePath,
     lengthRange, // [minLength, maxLength]
-    weightRange, // [minWeight, maxWeight]
     baseFishSpeed,
-    rewardPerKg,
+    rewardPerInch,
     allowedEquipment,
-    basePullFrequency, // pulls per second at minimum size
-    basePullSpeed, // pull force/speed at minimum size
+    tugCooldownRange,
+    tugDurationRange,
     tier = "common",
   }) {
     this.name = name;
     this.spriteKey = spriteKey;
     this.spritePath = spritePath;
     this.lengthRange = lengthRange;
-    this.weightRange = weightRange;
     this.baseFishSpeed = baseFishSpeed;
-    this.rewardPerKg = rewardPerKg;
+    this.rewardPerInch = rewardPerInch;
     this.allowedEquipment = allowedEquipment;
-    this.basePullFrequency = basePullFrequency;
-    this.basePullSpeed = basePullSpeed;
+    this.tugCooldownRange = tugCooldownRange;
+    this.tugDurationRange = tugDurationRange;
 
     // Will be generated at runtime
     this.length = null;
@@ -38,7 +36,6 @@ export default class Fish {
     this.fishSpeed = null;
     this.reward = null;
     this.pullFrequency = null;
-    this.pullSpeed = null;
     this.sprite = null;
     this.tier = tier;
   }
@@ -50,28 +47,19 @@ export default class Fish {
   // Randomize size & difficulty when caught
   generateStats() {
     const [minLength, maxLength] = this.lengthRange;
-    const [minWeight, maxWeight] = this.weightRange;
 
     // Pick a random length
     this.length = Phaser.Math.FloatBetween(minLength, maxLength);
 
-    // Scale weight proportionally to length
-    const lengthRatio = (this.length - minLength) / (maxLength - minLength);
-    this.weight = minWeight + lengthRatio * (maxWeight - minWeight);
-
     // Scale difficulty based on size
-    const sizeFactor = this.weight / maxWeight;
+    const sizeFactor = this.length / maxLength;
 
     // Movement speed
     this.fishSpeed = this.baseFishSpeed + sizeFactor * 0.5;
 
-    // Pull behavior
-    this.pullFrequency = this.basePullFrequency + sizeFactor * 1.0; // more often when bigger
-    this.pullSpeed = this.basePullSpeed + sizeFactor * 2.0; // harder pulls when bigger
-
     // Calculate reward
     this.reward = Math.floor(
-      this.weight * this.rewardPerKg * (TIER_MULTIPLIERS[this.tier] || 1)
+      this.length * this.rewardPerInch * (TIER_MULTIPLIERS[this.tier] || 1)
     );
   }
 

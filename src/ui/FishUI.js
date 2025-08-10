@@ -1,97 +1,17 @@
-// src/ui/CoinUI.js
 import Phaser from "phaser";
 
 const FIRE_ANIM_FRAMERATE = 14;
 
 export default class FishUI {
-  constructor(scene, x, y) {
+  constructor(scene) {
     this.scene = scene;
   }
 
   static preload(scene) {
-    scene.load.spritesheet(
-      "fire-common",
-      "./assets/ui/fireSprites/192/greenWarp.png",
-      {
-        frameWidth: 192,
-        frameHeight: 192,
-      }
-    );
-    scene.load.spritesheet(
-      "fire-uncommon",
-      "./assets/ui/fireSprites/192/blueWarp.png",
-      {
-        frameWidth: 192,
-        frameHeight: 192,
-      }
-    );
-    scene.load.spritesheet(
-      "fire-rare",
-      "./assets/ui/fireSprites/192/pinkWarp.png",
-      {
-        frameWidth: 192,
-        frameHeight: 192,
-      }
-    );
-    scene.load.spritesheet(
-      "fire-epic",
-      "./assets/ui/fireSprites/192/redWarp.png",
-      {
-        frameWidth: 192,
-        frameHeight: 192,
-      }
-    );
-    scene.load.spritesheet(
-      "fire-legendary",
-      "./assets/ui/fireSprites/192/yellowWarp.png",
-      {
-        frameWidth: 192,
-        frameHeight: 192,
-      }
-    );
+    this.preloadFireSprites(scene);
   }
-
   static createAnimations(scene) {
-    // Fire animations
-    scene.anims.create({
-      key: "fire-common",
-      frames: scene.anims.generateFrameNumbers("fire-common", {
-        start: 0,
-        end: 14,
-      }),
-      frameRate: FIRE_ANIM_FRAMERATE,
-      repeat: -1, // loop forever
-    });
-
-    scene.anims.create({
-      key: "fire-uncommon",
-      frames: scene.anims.generateFrameNumbers("fire-uncommon", {
-        start: 0,
-        end: 14,
-      }),
-      frameRate: FIRE_ANIM_FRAMERATE,
-      repeat: -1,
-    });
-
-    scene.anims.create({
-      key: "fire-rare",
-      frames: scene.anims.generateFrameNumbers("fire-rare", {
-        start: 0,
-        end: 14,
-      }),
-      frameRate: FIRE_ANIM_FRAMERATE,
-      repeat: -1,
-    });
-
-    scene.anims.create({
-      key: "fire-legendary",
-      frames: scene.anims.generateFrameNumbers("fire-legendary", {
-        start: 0,
-        end: 14,
-      }),
-      frameRate: FIRE_ANIM_FRAMERATE,
-      repeat: -1,
-    });
+    this.createFireAnims(scene);
   }
 
   showCatchUI(fish) {
@@ -168,6 +88,92 @@ export default class FishUI {
         this.catchUI.destroy();
         this.catchUI = null;
       },
+    });
+  }
+
+  static preloadFireSprites(scene) {
+    scene.load.spritesheet(
+      "fire-common",
+      "./assets/ui/fireSprites/192/greenWarp.png",
+      {
+        frameWidth: 192,
+        frameHeight: 192,
+      }
+    );
+    scene.load.spritesheet(
+      "fire-uncommon",
+      "./assets/ui/fireSprites/192/blueWarp.png",
+      {
+        frameWidth: 192,
+        frameHeight: 192,
+      }
+    );
+    scene.load.spritesheet(
+      "fire-rare",
+      "./assets/ui/fireSprites/192/pinkWarp.png",
+      {
+        frameWidth: 192,
+        frameHeight: 192,
+      }
+    );
+    scene.load.spritesheet(
+      "fire-epic",
+      "./assets/ui/fireSprites/192/redWarp.png",
+      {
+        frameWidth: 192,
+        frameHeight: 192,
+      }
+    );
+    scene.load.spritesheet(
+      "fire-legendary",
+      "./assets/ui/fireSprites/192/yellowWarp.png",
+      {
+        frameWidth: 192,
+        frameHeight: 192,
+      }
+    );
+  }
+
+  static createFireAnims(scene) {
+    // Fire animations
+    scene.anims.create({
+      key: "fire-common",
+      frames: scene.anims.generateFrameNumbers("fire-common", {
+        start: 0,
+        end: 14,
+      }),
+      frameRate: FIRE_ANIM_FRAMERATE,
+      repeat: -1, // loop forever
+    });
+
+    scene.anims.create({
+      key: "fire-uncommon",
+      frames: scene.anims.generateFrameNumbers("fire-uncommon", {
+        start: 0,
+        end: 14,
+      }),
+      frameRate: FIRE_ANIM_FRAMERATE,
+      repeat: -1,
+    });
+
+    scene.anims.create({
+      key: "fire-rare",
+      frames: scene.anims.generateFrameNumbers("fire-rare", {
+        start: 0,
+        end: 14,
+      }),
+      frameRate: FIRE_ANIM_FRAMERATE,
+      repeat: -1,
+    });
+
+    scene.anims.create({
+      key: "fire-legendary",
+      frames: scene.anims.generateFrameNumbers("fire-legendary", {
+        start: 0,
+        end: 14,
+      }),
+      frameRate: FIRE_ANIM_FRAMERATE,
+      repeat: -1,
     });
   }
 }

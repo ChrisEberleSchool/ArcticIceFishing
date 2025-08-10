@@ -7,12 +7,11 @@ export default class Trout extends Fish {
       spriteKey: "troutSprite",
       spritePath: "./assets/ui/FishUi/rainbow-trout.png",
       lengthRange: [12, 31],
-      weightRange: [1, 4],
-      baseFishSpeed: 0.6,
-      rewardPerKg: 50,
+      baseFishSpeed: 0.5,
+      rewardPerInch: 15,
       allowedEquipment: ["basicRod", "advancedRod"],
-      basePullFrequency: 1.2,
-      basePullSpeed: 1.2,
+      tugCooldownRange: [2500, 3000],
+      tugDurationRange: [1000, 1500],
       tier: "common",
     });
   }

@@ -7,12 +7,11 @@ export default class Salmon extends Fish {
       spriteKey: "salmonSprite",
       spritePath: "./assets/ui/FishUi/salmon.png",
       lengthRange: [20, 30],
-      weightRange: [1, 4],
       baseFishSpeed: 0.6,
-      rewardPerKg: 50,
+      rewardPerInch: 25,
       allowedEquipment: ["basicRod", "advancedRod"],
-      basePullFrequency: 1.3,
-      basePullSpeed: 1.2,
+      tugCooldownRange: [1000, 2000],
+      tugDurationRange: [1250, 3000],
       tier: "uncommon",
     });
   }

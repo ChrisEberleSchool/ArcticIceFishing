@@ -1,39 +1,29 @@
 import FishFactory from "./FishFactory.js";
 import UIScene from "../../../scenes/UIScene.js";
+import FishMiniGameUI from "../../../ui/FishMiniGameUI.js";
 
 export default class FishingSession {
   constructor(scene, player, fishingTile) {
     this.scene = scene;
     this.player = player;
     this.fishingTile = fishingTile;
-
-    this.state = null;
-    this.minigameUI = null;
-    this.hookSprite = null;
-
-    this.barHeight = 140;
-    this.barWidth = 25;
-
-    this.hookY = 0;
-    this.pullSpeed = 3.2;
-    this.catchAnimationDuration = 3000;
+    this.currentFish = null;
 
     this.player.fishing = true;
-
+    this.state = null;
     this.isMouseDown = false;
     this.isTugging = false;
     this.fightActive = false;
 
+    this.hookY = 0;
+    this.pullSpeed = 6;
+    this.catchAnimationDuration = 3000;
     this.catchTimer = null;
-
-    this.currentFish = null;
 
     this.start();
   }
 
-  static preload(scene) {
-    scene.load.image("fishHook", "./assets/ui/fishHook.png");
-  }
+  static preload(scene) {}
 
   static createAnimations(scene) {}
 
@@ -89,8 +79,6 @@ export default class FishingSession {
     this.player.fishingState = "fight";
     this.player.updateAnimation();
 
-    if (this.minigameUI) this.minigameUI.destroy();
-
     // Get fish based on player's current equipment
     this.currentFish = FishFactory.getRandomFish(this.player.currentEquipment);
     if (!this.currentFish) {
@@ -99,37 +87,41 @@ export default class FishingSession {
       return;
     }
 
-    const x = this.player.x + 50;
-    const y = this.player.y - 60;
-    this.minigameUI = this.scene.add.container(x, y);
-
-    // Background bar
-    const bg = this.scene.add
-      .rectangle(0, 0, this.barWidth, this.barHeight, 0x333333)
-      .setOrigin(0.5);
-
-    // Hook sprite indicator
-    this.hookSprite = this.scene.add.sprite(0, 0, "fishHook").setScale(0.05);
-    this.hookY = 0;
-    this.hookSprite.y = this.hookY;
-
-    this.minigameUI.add([bg, this.hookSprite]);
+    // Ensure fishMiniGameUI exists
+    if (UIScene.instance) {
+      if (!UIScene.instance.fishMiniGameUI) {
+        UIScene.instance.fishMiniGameUI = new FishMiniGameUI(UIScene.instance);
+      }
+      UIScene.instance.fishMiniGameUI.showMiniGameUI();
+      this.hookY = 0; // reset hook position
+      UIScene.instance.fishMiniGameUI.updateHookIndicator(this.hookY);
+      UIScene.instance.fishMiniGameUI.resetLineHealth();
+    }
 
     this.isMouseDown = false;
     this.isTugging = false;
 
-    // NO input event registration here anymore!
+    // Tug Event Setup
 
+    const [minTugDuration, maxTugDuration] = this.currentFish.tugDurationRange;
+    const [minTugCooldown, maxTugCooldown] = this.currentFish.tugCooldownRange;
+
+    const tugCallback = () => {
+      this.isTugging = true;
+      this.scene.time.delayedCall(
+        Phaser.Math.Between(minTugDuration, maxTugDuration),
+        () => (this.isTugging = false)
+      );
+    };
+
+    // Fire first tug immediately
+    tugCallback();
+
+    // Then schedule repeated tugs with randomized delay
     this.tugEvent = this.scene.time.addEvent({
-      delay: Phaser.Math.Between(
-        1000 / this.currentFish.pullFrequency,
-        2000 / this.currentFish.pullFrequency
-      ),
+      delay: Phaser.Math.Between(minTugCooldown, maxTugCooldown),
       loop: true,
-      callback: () => {
-        this.isTugging = true;
-        this.scene.time.delayedCall(500, () => (this.isTugging = false));
-      },
+      callback: tugCallback,
     });
 
     this.updateEvent = this.scene.time.addEvent({
@@ -141,22 +133,43 @@ export default class FishingSession {
   }
 
   updateFight() {
-    if (!this.hookSprite || !this.player.fishing || !this.currentFish) return;
-    const minY = -this.barHeight / 2 + 15;
-    const maxY = this.barHeight / 2 - 15;
+    if (
+      !UIScene.instance ||
+      !UIScene.instance.fishMiniGameUI ||
+      !this.currentFish
+    )
+      return;
+
+    const ui = UIScene.instance.fishMiniGameUI;
+    const minY = -ui.barHeight / 2 + 50;
+    const maxY = ui.barHeight / 2 - 50;
 
     if (this.isTugging) {
       this.hookY += this.currentFish.fishSpeed;
-      this.hookSprite.setTint(0xff0000);
+      ui.hookSprite.setTint(0xff0000);
+
+      // Reduce line health when tugging and player reels (holding mouse down)
+      if (this.isMouseDown) {
+        // Adjust the amount reduced per frame to your liking
+        const lineBroken = ui.updateLineHealth(3);
+
+        if (lineBroken) {
+          this.endFight(false); // line broke -> lose fight
+          return;
+        }
+      }
     } else {
       if (this.isMouseDown) this.hookY -= this.pullSpeed;
-      this.hookSprite.clearTint();
+      ui.hookSprite.clearTint();
+
+      // Optionally recover line health slowly if not tugging
+      ui.updateLineHealth(-1);
     }
 
     if (this.hookY < minY) this.hookY = minY;
     if (this.hookY > maxY) this.hookY = maxY;
 
-    this.hookSprite.y = this.hookY;
+    ui.updateHookIndicator(this.hookY);
 
     if (this.hookY <= minY) {
       this.endFight(true);
@@ -167,16 +180,11 @@ export default class FishingSession {
 
   endFight(won) {
     this.clearTimers();
-
-    if (this.hookSprite) {
-      this.hookSprite.destroy();
-      this.hookSprite = null;
-    }
     this.fightActive = false;
 
-    if (this.minigameUI) {
-      this.minigameUI.destroy();
-      this.minigameUI = null;
+    if (UIScene.instance && UIScene.instance.fishMiniGameUI) {
+      UIScene.instance.fishMiniGameUI.destroy();
+      UIScene.instance.fishMiniGameUI = null;
     }
 
     if (won) {
@@ -184,31 +192,31 @@ export default class FishingSession {
       console.log(
         `You caught a ${this.currentFish.tier} ${this.currentFish.name} and earned ${this.currentFish.reward} coins!`
       );
+
       this.player.fishingState = "caught";
       this.player.updateAnimation();
 
-      // Call showCatchUI on the FishUI instance in UIScene
       if (UIScene.instance && UIScene.instance.fishUI) {
         UIScene.instance.fishUI.showCatchUI(this.currentFish);
-      } else {
-        console.warn("FishUI not ready");
       }
 
       this.catchTimer = this.scene.time.delayedCall(
         this.catchAnimationDuration,
         () => {
-          this.catchTimer = null; // clear ref on completion
+          this.catchTimer = null;
           if (this.player.fishing) this.waitForBite();
         }
       );
     } else {
-      console.log("You lost the fish!");
+      console.log(
+        `You Lost a ${this.currentFish.tier} ${this.currentFish.name}`
+      );
+
       this.player.fishingState = "idle";
       this.player.updateAnimation();
       this.waitForBite();
     }
 
-    // Clear current fish when fight ends
     this.currentFish = null;
   }
 
@@ -236,9 +244,9 @@ export default class FishingSession {
 
     // NO input event off here
 
-    if (this.minigameUI) {
-      this.minigameUI.destroy();
-      this.minigameUI = null;
+    if (UIScene.instance && UIScene.instance.fishMiniGameUI) {
+      UIScene.instance.fishMiniGameUI.destroy();
+      UIScene.instance.fishMiniGameUI = null;
     }
 
     this.player.fishing = false;

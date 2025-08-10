@@ -1,8 +1,16 @@
-// FishFactory.js
 import Trout from "./FishTypes/Trout.js";
 import Salmon from "./FishTypes/Salmon.js";
+import BlueFinTuna from "./FishTypes/BlueFinTuna.js";
 
-const ALL_FISH = [Trout, Salmon];
+const ALL_FISH = [Trout, Salmon, BlueFinTuna];
+
+const TIER_SPAWN_WEIGHTS = {
+  common: 50,
+  uncommon: 25,
+  rare: 15,
+  epic: 7,
+  legendary: 3,
+};
 
 export default class FishFactory {
   static getRandomFish(equipment) {
@@ -17,11 +25,20 @@ export default class FishFactory {
       return null;
     }
 
-    // Pick a random type
-    const FishClass = Phaser.Utils.Array.GetRandom(available);
+    // Build weighted array
+    const weightedFish = [];
+    available.forEach((FishClass) => {
+      const fish = new FishClass();
+      const weight = TIER_SPAWN_WEIGHTS[fish.tier] || 1;
+      for (let i = 0; i < weight; i++) {
+        weightedFish.push(FishClass);
+      }
+    });
+
+    // Pick a random fish weighted by tier
+    const FishClass = Phaser.Utils.Array.GetRandom(weightedFish);
     const fish = new FishClass();
 
-    // Roll random length/weight/stats
     fish.generateStats();
 
     return fish;

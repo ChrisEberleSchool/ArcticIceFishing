@@ -4,6 +4,7 @@ import RemotePlayer from "../objects/Player/RemotePlayer.js";
 import sizes from "../config/gameConfig.js";
 import CoinUI from "../ui/CoinUI.js";
 import FishUI from "../ui/FishUI.js";
+import FishMiniGameUI from "../ui/FishMiniGameUI.js";
 import FishFactory from "../objects/Map/fishing/FishFactory.js";
 
 export default class UIScene extends Phaser.Scene {
@@ -12,23 +13,27 @@ export default class UIScene extends Phaser.Scene {
   constructor() {
     super("scene-ui");
     this.coinUI = null;
-    this.FishUI = null;
+    this.fishUI = null;
+    this.fishMiniGameUI = null;
   }
 
   preload() {
     this.load.image("coin", "./assets/ui/coin.png");
     FishUI.preload(this);
     FishFactory.preloadAll(this);
+    FishMiniGameUI.preload(this);
   }
 
   create() {
     UIScene.instance = this;
 
-    // Call createAnimations so fire anims are created
+    // Fish UI
     FishUI.createAnimations(this);
-    // Create fishUI instance at top-right or wherever you want
-    this.fishUI = new FishUI(this, 400, 100); // example coordinates\
+    this.fishUI = new FishUI(this);
 
+    this.fishMiniGameUI = new FishMiniGameUI(this);
+
+    // Player Stats UI
     const coinMargin = 100;
     this.coinUI = new CoinUI(this, coinMargin, coinMargin);
   }
