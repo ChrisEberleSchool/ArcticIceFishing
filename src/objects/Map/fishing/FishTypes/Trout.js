@@ -3,10 +3,10 @@ import Fish from "../Fish";
 export default class Trout extends Fish {
   constructor() {
     super({
-      name: "Trout",
+      name: "Rainbow Trout",
       spriteKey: "troutSprite",
-      spritePath: "./assets/fish/trout.png",
-      lengthRange: [20, 40],
+      spritePath: "./assets/ui/FishUi/rainbow-trout.png",
+      lengthRange: [12, 31],
       weightRange: [1, 4],
       baseFishSpeed: 0.6,
       rewardPerKg: 50,
@@ -18,6 +18,6 @@ export default class Trout extends Fish {
   }
 
   static preload(scene) {
-    scene.load.image("troutSprite", "./assets/fish/trout.png");
+    scene.load.image("troutSprite", "./assets/ui/FishUi/rainbow-trout.png");
   }
 }

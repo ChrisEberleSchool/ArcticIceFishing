@@ -1,6 +1,7 @@
 import "./style.css";
 import Phaser from "phaser";
 import GameScene from "./scenes/GameScene.js";
+import UIScene from "./scenes/UIScene.js";
 import socket from "./network/socket.js";
 import sizes from "./config/gameConfig.js";
 
@@ -43,11 +44,20 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
     document.getElementById("gameCanvas").style.display = "block";
 
     if (!game.scene.getScene("scene-game")) {
-      game.scene.add("scene-game", GameScene, true, { username: uname });
+      game.scene.add("scene-game", GameScene, true, { username: uname }); // autoStart=true
     } else {
-      // Scene already exists, just start it or restart it
       game.scene.start("scene-game", { username: uname });
     }
+
+    if (!game.scene.getScene("scene-ui")) {
+      game.scene.add("scene-ui", UIScene, false); // autoStart=false
+    }
+
+    if (!game.scene.isActive("scene-ui")) {
+      game.scene.start("scene-ui", UIScene, true); // launch parallel
+    }
+
+    game.scene.bringToTop("scene-ui");
   });
 
   socket.once("authError", (msg) => {

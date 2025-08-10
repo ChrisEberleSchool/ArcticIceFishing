@@ -5,6 +5,7 @@ import RemotePlayer from "../objects/Player/RemotePlayer.js";
 import registerPlayerEvents from "../objects/Player/PlayerEvents.js";
 import WorldGrid from "../objects/Map/WorldGrid.js";
 import InputManager from "../objects/InputManager.js";
+import sizes from "../config/gameConfig.js";
 
 const TILE_SIZE = 32;
 const PLAYER_SPAWN_POINT = { x: 250, y: 250 };
@@ -25,9 +26,6 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image("spenn", "./assets/Spen.png"); // load your PNG file
     this.load.image("dena", "./assets/Dena.png"); // load your PNG file
-
-    // gold coin ui
-    this.load.image("coin", "./assets/ui/coin.png");
   }
 
   create(data) {
@@ -71,7 +69,9 @@ export default class GameScene extends Phaser.Scene {
         this.localPlayer.setPosition(playerData.x, playerData.y);
         this.localPlayer.coins = playerData.coins;
         this.localPlayer.fishCaught = playerData.fishCaught;
-        this.updateCoinText(this.localPlayer.coins);
+        this.scene
+          .get("scene-ui")
+          .coinUI.updateCoinText(this.localPlayer.coins);
       }
     });
 
@@ -121,36 +121,10 @@ export default class GameScene extends Phaser.Scene {
         event.stopPropagation(); // prevent Phaser from receiving input
       }
     });
-
-    // Create container at (10, 10) in the viewport (fixed position)
-    this.coinContainer = this.add.container(400, 265).setScrollFactor(0);
-
-    const padding = 5; // space between icon and text
-
-    const coinIcon = this.add
-      .image(0, 0, "coin")
-      .setOrigin(0, 0.5) // top-left horizontally, vertically centered
-      .setScale(0.0575);
-
-    this.coinText = this.add
-      .text(coinIcon.displayWidth + padding, 0, "0", {
-        fontSize: "16px",
-        fontFamily: "Arial",
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 3,
-      })
-      .setOrigin(0, 0.5);
-
-    this.coinContainer.add([coinIcon, this.coinText]);
   }
 
   shutdown() {
     this.inputManager.destroy();
-  }
-
-  updateCoinText(newCoinAmount) {
-    this.coinText.setText(newCoinAmount.toString());
   }
 
   lastMovementEmit = 0; // timestamp of last emit

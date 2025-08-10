@@ -17,7 +17,7 @@ export default class RemotePlayer {
 
     this.nameText = scene.add
       .text(x, y - 24, username.toUpperCase(), {
-        fontSize: "12px",
+        fontSize: "8px",
         color: "#00ffff", // neon cyan-ish
         fontFamily: "'Orbitron', monospace", // sci-fi style font
         stroke: "#003344",

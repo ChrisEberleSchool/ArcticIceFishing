@@ -1,5 +1,6 @@
 import FishingTileEvents from "../Map/FishingTileEvents";
 import FishingSession from "../Map/fishing/FishingSession.js";
+import UIScene from "../../scenes/UIScene.js";
 
 //locomotion
 const ANIM_IDLE_FRAMERATE = 4;
@@ -23,10 +24,9 @@ export default class Player {
     this.distToTarget = 3;
     this.facing = "down";
     this.isMoving = false;
+
     this.currentEquipment = "basicRod";
-
     this.fishingSession = null;
-
     this.fishingTimer = null;
     this.fishingState = null; // "cast", "idle", "fight"
     this.currentFishingTile = null;
@@ -63,7 +63,7 @@ export default class Player {
       .setOrigin(0.5);
 
     this.scene.cameras.main.startFollow(this.sprite);
-    this.scene.cameras.main.zoom = 2.5;
+    this.scene.cameras.main.zoom = 4.5;
 
     this.interactText = this.scene.add
       .text(
@@ -81,6 +81,19 @@ export default class Player {
       )
       .setOrigin(0.5);
     this.interactText.setVisible(false);
+  }
+
+  createNameText(scene) {
+    this.nameText = scene.add
+      .text(x, y - 24, username.toUpperCase(), {
+        fontSize: "10px",
+        color: "#00ffff", // neon cyan-ish
+        fontFamily: "'Orbitron', monospace", // sci-fi style font
+        stroke: "#003344",
+        strokeThickness: 2,
+        letterSpacing: 1.5,
+      })
+      .setOrigin(0.5);
   }
 
   static preload(scene) {
@@ -116,7 +129,7 @@ export default class Player {
 
   static createAnimations(scene) {
     // Create Animations
-
+    FishingSession.createAnimations(scene);
     // IDLE ANIMS
     scene.anims.create({
       key: "idle-up",
@@ -422,9 +435,10 @@ export default class Player {
     // Optionally clamp to 0 minimum:
     if (this.coins < 0) this.coins = 0;
 
-    // Notify the scene (or whoever owns the UI) that coins changed:
-    if (this.scene && this.scene.updateCoinText) {
-      this.scene.updateCoinText(this.coins);
+    if (UIScene.instance && UIScene.instance.coinUI) {
+      UIScene.instance.coinUI.updateCoinText(this.coins);
+    } else {
+      console.warn("CoinUI not ready yet.");
     }
   }
 

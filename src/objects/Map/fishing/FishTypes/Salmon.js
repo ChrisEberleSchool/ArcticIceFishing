@@ -5,8 +5,8 @@ export default class Salmon extends Fish {
     super({
       name: "Salmon",
       spriteKey: "salmonSprite",
-      spritePath: "./assets/fish/salmon.png",
-      lengthRange: [20, 40],
+      spritePath: "./assets/ui/FishUi/salmon.png",
+      lengthRange: [20, 30],
       weightRange: [1, 4],
       baseFishSpeed: 0.6,
       rewardPerKg: 50,
@@ -18,6 +18,6 @@ export default class Salmon extends Fish {
   }
 
   static preload(scene) {
-    scene.load.image("salmonSprite", "./assets/fish/salmon.png");
+    scene.load.image("salmonSprite", "./assets/ui/FishUi/salmon.png");
   }
 }

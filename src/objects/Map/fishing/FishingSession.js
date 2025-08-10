@@ -1,4 +1,5 @@
 import FishFactory from "./FishFactory.js";
+import UIScene from "../../../scenes/UIScene.js";
 
 export default class FishingSession {
   constructor(scene, player, fishingTile) {
@@ -14,7 +15,7 @@ export default class FishingSession {
     this.barWidth = 25;
 
     this.hookY = 0;
-    this.pullSpeed = 2.8;
+    this.pullSpeed = 3.2;
     this.catchAnimationDuration = 3000;
 
     this.player.fishing = true;
@@ -32,8 +33,9 @@ export default class FishingSession {
 
   static preload(scene) {
     scene.load.image("fishHook", "./assets/ui/fishHook.png");
-    FishFactory.preloadAll(scene);
   }
+
+  static createAnimations(scene) {}
 
   start() {
     this.state = "cast";
@@ -184,6 +186,13 @@ export default class FishingSession {
       );
       this.player.fishingState = "caught";
       this.player.updateAnimation();
+
+      // Call showCatchUI on the FishUI instance in UIScene
+      if (UIScene.instance && UIScene.instance.fishUI) {
+        UIScene.instance.fishUI.showCatchUI(this.currentFish);
+      } else {
+        console.warn("FishUI not ready");
+      }
 
       this.catchTimer = this.scene.time.delayedCall(
         this.catchAnimationDuration,

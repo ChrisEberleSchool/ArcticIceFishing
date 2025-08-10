@@ -1,6 +1,6 @@
 const sizes = {
-  width: 1250,
-  height: 800,
+  width: 1920,
+  height: 1080,
 };
 
 export default sizes;
