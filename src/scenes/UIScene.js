@@ -5,7 +5,7 @@ import sizes from "../config/gameConfig.js";
 import CoinUI from "../ui/CoinUI.js";
 import FishUI from "../ui/FishUI.js";
 import FishMiniGameUI from "../ui/FishMiniGameUI.js";
-import FishFactory from "../objects/Map/fishing/FishFactory.js";
+import FishFactory from "../objects/fishing/FishFactory.js";
 
 export default class UIScene extends Phaser.Scene {
   static instance = null;

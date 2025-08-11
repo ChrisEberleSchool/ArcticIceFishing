@@ -44,19 +44,37 @@ export default class FishUI {
       .setScale(2);
     fireSprite.play(fireKey); // assumes you preloaded animations
 
-    // Fish sprite
+    // Get original fish image size
+    const frame = this.scene.textures.get(fish.spriteKey).getSourceImage();
+    const desiredHeight = 225; // fixed display height in pixels
+
+    // Calculate scale to fit desired height
+    const scale = desiredHeight / frame.height;
+
+    // Fish sprite with proportional scale
     const fishSprite = this.scene.add
       .sprite(0, 0, fish.spriteKey)
-      .setScale(0.5);
+      .setScale(scale);
+
+    // Map tier to color
+    const tierColors = {
+      common: "#00ff00", // green
+      uncommon: "#0000ff", // blue
+      rare: "#ff00ff", // pink
+      epic: "#ff0000", // red (optional)
+      legendary: "#ffff00", // yellow
+    };
+
+    const nameColor = tierColors[fish.tier] || "#ffffff";
 
     // Text for Fish Name
     const nameText = this.scene.add
       .text(0, -175, `${fish.name}`, {
         fontSize: "80px",
-        color: "#fff",
+        color: nameColor,
         align: "center",
-        stroke: "#000",
-        strokeThickness: 11,
+        stroke: nameColor,
+        strokeThickness: 5,
       })
       .setOrigin(0.5);
 
@@ -83,7 +101,7 @@ export default class FishUI {
       targets: this.catchUI,
       alpha: 0,
       duration: 1000, // fade out over 1 seconds
-      delay: 4000, // wait 5 seconds before starting fade
+      delay: 6000, // wait 6 seconds before starting fade
       onComplete: () => {
         this.catchUI.destroy();
         this.catchUI = null;

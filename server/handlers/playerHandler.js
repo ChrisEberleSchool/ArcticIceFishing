@@ -56,12 +56,24 @@ export default function playerHandler(socket, io) {
   );
 
   // These calls can be throttled
-  socket.on("playerStats", ({ coins, fishCaught }) => {
+  socket.on("playerStats", async ({ coins, fishCaught }) => {
     const player = players[socket.id];
     if (!player) return;
 
     player.coins = coins;
     player.fishCaught = fishCaught;
+
+    try {
+      await prisma.user.update({
+        where: { username: player.username },
+        data: {
+          coins: player.coins,
+          fishCaught: player.fishCaught,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to update player stats:", err);
+    }
   });
 }
 

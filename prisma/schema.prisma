@@ -14,13 +14,28 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique
+  id         Int          @id @default(autoincrement())
+  username   String       @unique
   password   String
-  coins      Int      @default(0)
-  fishCaught Int      @default(0)
-  x          Float?   @default(250)
-  y          Float?   @default(250)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  coins      Int          @default(0)
+  fishCaught Int          @default(0)
+  x          Float?       @default(250)
+  y          Float?       @default(250)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  biggestFish BiggestFish[]
+}
+
+model BiggestFish {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  fishName  String
+  length    Float
+  tier      String
+  reward    Int
+  caughtAt  DateTime @default(now())
+
+  @@unique([userId, fishName])  // enforce one fish type per user
 }

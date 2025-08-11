@@ -1,5 +1,5 @@
 import FishingTileEvents from "../Map/FishingTileEvents";
-import FishingSession from "../Map/fishing/FishingSession.js";
+import FishingSession from "../fishing/FishingSession.js";
 import UIScene from "../../scenes/UIScene.js";
 
 //locomotion

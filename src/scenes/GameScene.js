@@ -6,6 +6,7 @@ import registerPlayerEvents from "../objects/Player/PlayerEvents.js";
 import WorldGrid from "../objects/Map/WorldGrid.js";
 import InputManager from "../objects/InputManager.js";
 import sizes from "../config/gameConfig.js";
+import Leaderboard from "../objects/Leaderboard/Leaderboard.js";
 
 const TILE_SIZE = 32;
 const PLAYER_SPAWN_POINT = { x: 250, y: 250 };
@@ -120,6 +121,21 @@ export default class GameScene extends Phaser.Scene {
       if (document.activeElement === chatInput) {
         event.stopPropagation(); // prevent Phaser from receiving input
       }
+    });
+
+    // leaderboard
+    this.leaderboard = new Leaderboard(this, 280, 10);
+    socket.emit("requestLeaderboard");
+
+    socket.on("leaderboardData", (data) => {
+      this.leaderboard.updateLeaderboard(data);
+    });
+
+    // Optional: refresh every 30s or so
+    this.time.addEvent({
+      delay: 30000,
+      callback: () => socket.emit("requestLeaderboard"),
+      loop: true,
     });
   }
 

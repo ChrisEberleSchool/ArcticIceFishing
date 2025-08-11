@@ -12,6 +12,8 @@ import { fishingHoles } from "../state/fishingHoles.js";
 
 import chatHandler from "../handlers/chatHandler.js";
 
+import leaderboardHandler from "../handlers/leaderboardHandler.js";
+
 export default function socketConfig(io) {
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
@@ -20,6 +22,7 @@ export default function socketConfig(io) {
     playerHandler(socket, io);
     fishingHandler(socket, io);
     chatHandler(socket, io);
+    leaderboardHandler(socket, io);
 
     // TODO :: Remove this
     // Send initial fishing holes state to the newly connected player

@@ -13,3 +13,10 @@ export default function chatHandler(socket, io) {
     }
   });
 }
+
+export function sendServerMessage(io, message) {
+  io.emit("chatMessage", {
+    username: "Server",
+    message,
+  });
+}
