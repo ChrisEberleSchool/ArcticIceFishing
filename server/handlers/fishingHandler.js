@@ -30,7 +30,7 @@ export default function fishingHandler(socket, io) {
 
   socket.on("fishCaught", async (fishData) => {
     const userId = socket.userId; // Ensure userId is set on the socket during authentication
-
+    console.log("fishCaught from", socket.userId, fishData);
     if (!userId) {
       socket.emit("error", "Not authenticated");
       return;

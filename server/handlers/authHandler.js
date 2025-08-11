@@ -39,7 +39,7 @@ export default function authHandler(socket, io) {
         password: storedPassword,
         socketId: socket.id,
       };
-      socket.userId = user.id;
+      socket.userId = newUser.id;
 
       socket.emit("authSuccess", { username });
       console.log("Player Joined World:", username);
