@@ -29,70 +29,58 @@ export default function fishingHandler(socket, io) {
   });
 
   socket.on("fishCaught", async (fishData) => {
-    const userId = socket.userId; // Ensure userId is set on the socket during authentication
-    console.log("fishCaught from", socket.userId, fishData);
-    if (!userId) {
-      socket.emit("error", "Not authenticated");
+    // fishData could contain { name, length, tier, reward }
+    if (!socket.userId) {
+      console.warn(`fishCaught event without userId for socket ${socket.id}`);
       return;
     }
 
     try {
-      // Upsert biggest fish logic
-      const existingFish = await prisma.biggestFish.findUnique({
+      // Increment total fish caught
+      await prisma.user.update({
+        where: { id: socket.userId },
+        data: {
+          fishCaught: { increment: 1 },
+          coins: { increment: fishData.reward || 0 },
+        },
+      });
+
+      // Optionally track biggest fish for that type
+      await prisma.biggestFish.upsert({
         where: {
           userId_fishName: {
-            userId,
+            userId: socket.userId,
             fishName: fishData.name,
           },
         },
-      });
-
-      if (!existingFish) {
-        await prisma.biggestFish.create({
-          data: {
-            userId,
-            fishName: fishData.name,
-            length: fishData.length,
-            tier: fishData.tier,
-            reward: fishData.reward,
-          },
-        });
-      } else if (fishData.length > existingFish.length) {
-        await prisma.biggestFish.update({
-          where: { id: existingFish.id },
-          data: {
-            length: fishData.length,
-            tier: fishData.tier,
-            reward: fishData.reward,
-            caughtAt: new Date(),
-          },
-        });
-      }
-
-      // Increment fishCaught for user
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          fishCaught: {
-            increment: 1,
-          },
+        update: {
+          length: Math.max(fishData.length, prisma.length),
+          reward: fishData.reward,
+          tier: fishData.tier,
+          caughtAt: new Date(),
+        },
+        create: {
+          userId: socket.userId,
+          fishName: fishData.name,
+          length: fishData.length,
+          tier: fishData.tier,
+          reward: fishData.reward,
         },
       });
 
-      // Get updated fishCaught count
-      const updatedUser = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { fishCaught: true },
+      // Notify the client that the update succeeded
+      socket.emit("fishCaughtSuccess", {
+        fishName: fishData.name,
+        length: fishData.length,
+        reward: fishData.reward,
       });
 
-      // Emit confirmation with updated fishCaught count
-      socket.emit("fishCatchConfirmed", {
-        ...fishData,
-        fishCaught: updatedUser.fishCaught,
-      });
-    } catch (error) {
-      console.error("Error updating biggest fish or fishCaught:", error);
-      socket.emit("error", "Failed to update fish data");
+      console.log(
+        `User ${socket.userId} caught a ${fishData.tier} ${fishData.name}`
+      );
+    } catch (err) {
+      console.error("Error handling fishCaught:", err);
+      socket.emit("fishCaughtError", { message: "Could not save fish" });
     }
   });
 }

@@ -35,11 +35,15 @@ export default function authHandler(socket, io) {
         },
       });
 
+      // Store user info in memory (without password)
       users[username] = {
-        password: storedPassword,
+        id: newUser.id,
         socketId: socket.id,
       };
+
+      // Attach to socket for later use
       socket.userId = newUser.id;
+      socket.username = username;
 
       socket.emit("authSuccess", { username });
       console.log("Player Joined World:", username);
@@ -55,7 +59,7 @@ export default function authHandler(socket, io) {
       return socket.emit("authError", "Missing fields");
     }
 
-    // 1. Check if user already logged in on another socket
+    // Check if user already logged in on another socket
     if (users[username] && users[username].socketId !== socket.id) {
       return socket.emit("authError", "User already logged in");
     }
@@ -77,11 +81,15 @@ export default function authHandler(socket, io) {
         return socket.emit("authError", "Incorrect password");
       }
 
+      // Store user info in memory (without password)
       users[username] = {
-        password: user.password,
+        id: user.id,
         socketId: socket.id,
       };
+
+      // Attach to socket for later use
       socket.userId = user.id;
+      socket.username = username;
 
       socket.emit("authSuccess", { username });
       console.log("Player Logged In:", username);
