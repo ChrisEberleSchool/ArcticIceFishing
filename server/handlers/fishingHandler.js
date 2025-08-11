@@ -45,7 +45,7 @@ export default function fishingHandler(socket, io) {
       });
 
       // Fetch existing biggest fish record for this fish type
-      const existingFish = await prisma.biggestFish.findUnique({
+      const existingFish = await prisma.BiggestFish.findUnique({
         where: {
           userId_fishName: {
             userId: socket.userId,
@@ -56,7 +56,7 @@ export default function fishingHandler(socket, io) {
 
       if (!existingFish) {
         // Create new record since none exists
-        await prisma.biggestFish.create({
+        await prisma.BiggestFish.create({
           data: {
             userId: socket.userId,
             fishName: fishData.name,
@@ -67,7 +67,7 @@ export default function fishingHandler(socket, io) {
         });
       } else if (fishData.length > existingFish.length) {
         // Update only if new fish is bigger
-        await prisma.biggestFish.update({
+        await prisma.BiggestFish.update({
           where: { id: existingFish.id },
           data: {
             length: fishData.length,
