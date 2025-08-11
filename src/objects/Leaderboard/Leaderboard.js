@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 
+const LEADERBOARD_ENTRY_NUM = 5;
+
 export default class Leaderboard {
   constructor(scene, x, y) {
     this.scene = scene;
@@ -20,7 +22,7 @@ export default class Leaderboard {
 
     // Array for player entries (text objects)
     this.entries = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < LEADERBOARD_ENTRY_NUM; i++) {
       const entryText = this.scene.add.text(0, 24 + i * 20, "", {
         fontFamily: "'Orbitron', monospace",
         fontSize: "14px",
@@ -35,7 +37,7 @@ export default class Leaderboard {
 
   // Call this to update leaderboard display with new data
   updateLeaderboard(data) {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < LEADERBOARD_ENTRY_NUM; i++) {
       if (data[i]) {
         const { username, tier, fishName, length, caughtAt } = data[i];
         const dateStr = new Date(caughtAt).toLocaleDateString();
