@@ -29,14 +29,13 @@ export default function fishingHandler(socket, io) {
   });
 
   socket.on("fishCaught", async (fishData) => {
-    // fishData could contain { name, length, tier, reward }
     if (!socket.userId) {
       console.warn(`fishCaught event without userId for socket ${socket.id}`);
       return;
     }
 
     try {
-      // Increment total fish caught
+      // Increment fishCaught and coins atomically
       await prisma.user.update({
         where: { id: socket.userId },
         data: {
@@ -45,30 +44,40 @@ export default function fishingHandler(socket, io) {
         },
       });
 
-      // Optionally track biggest fish for that type
-      await prisma.biggestFish.upsert({
+      // Fetch existing biggest fish record for this fish type
+      const existingFish = await prisma.biggestFish.findUnique({
         where: {
           userId_fishName: {
             userId: socket.userId,
             fishName: fishData.name,
           },
         },
-        update: {
-          length: Math.max(fishData.length, prisma.length),
-          reward: fishData.reward,
-          tier: fishData.tier,
-          caughtAt: new Date(),
-        },
-        create: {
-          userId: socket.userId,
-          fishName: fishData.name,
-          length: fishData.length,
-          tier: fishData.tier,
-          reward: fishData.reward,
-        },
       });
 
-      // Notify the client that the update succeeded
+      if (!existingFish) {
+        // Create new record since none exists
+        await prisma.biggestFish.create({
+          data: {
+            userId: socket.userId,
+            fishName: fishData.name,
+            length: fishData.length,
+            tier: fishData.tier,
+            reward: fishData.reward,
+          },
+        });
+      } else if (fishData.length > existingFish.length) {
+        // Update only if new fish is bigger
+        await prisma.biggestFish.update({
+          where: { id: existingFish.id },
+          data: {
+            length: fishData.length,
+            tier: fishData.tier,
+            reward: fishData.reward,
+            caughtAt: new Date(),
+          },
+        });
+      }
+
       socket.emit("fishCaughtSuccess", {
         fishName: fishData.name,
         length: fishData.length,
