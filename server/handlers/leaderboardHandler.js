@@ -4,7 +4,7 @@ import prisma from "../db/prismaClient.js";
 async function getLeaderboard() {
   const topFish = await prisma.BiggestFish.findMany({
     orderBy: { length: "desc" },
-    take: 10,
+    take: 5,
     include: { user: true },
   });
 
