@@ -53,6 +53,9 @@ export default class UIScene extends Phaser.Scene {
         UIScene.instance.gameBarUI.addChatMessage(data);
       }
     });
+
+    // Emit "ready" so LoadingScene knows UI is fully loaded
+    this.events.emit("ready");
   }
 
   update() {}

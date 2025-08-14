@@ -18,6 +18,7 @@ export default class GameScene extends Phaser.Scene {
     this.localPlayer = null;
     this.socket = socket;
     this.worldGrid = null;
+    this.leaderboard = null;
   }
 
   preload() {
@@ -118,6 +119,9 @@ export default class GameScene extends Phaser.Scene {
         console.log("Player stopped fishing due to GameBar exit.");
       }
     });
+
+    // Emit "ready" so LoadingScene knows UI is fully loaded
+    this.events.emit("ready");
   }
 
   shutdown() {
