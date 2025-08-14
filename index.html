@@ -7,46 +7,29 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0"
     />
-
+    <link rel="icon" href="./assets/bg.png" type="image/x-icon" />
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
-    <main>
-      <!-- Login/Signup UI -->
-      <div id="loginScreen">
-        <h2>Login or Signup</h2>
-        <form id="loginForm">
-          <input id="username" type="text" placeholder="Username" required />
-          <input
-            id="password"
-            type="password"
-            placeholder="Password"
-            required
-          />
-          <select id="authMode">
-            <option value="login">Login</option>
-            <option value="signup">Signup</option>
-          </select>
-          <button type="submit">Enter Game</button>
-        </form>
-      </div>
+    <header>
+      <div class="nav-bar"><a href="index.html">Home</a></div>
+      <div class="nav-bar"><a href="about.html">About</a></div>
+      <div class="nav-bar"><a href="contact.html">Contact</a></div>
+      <div class="nav-bar"><a href="whatsnew.html">What's New</a></div>
+    </header>
+    <!-- Landing Page -->
+    <div id="landingPage">
+      <main>
+        <button id="playNowBtn">Play Now</button>
+      </main>
+    </div>
 
-      
-
-      <!-- Game Canvas -->
-      <canvas id="gameCanvas"></canvas>
-
-      <div id="chat-container">
-        <div id="chat-log"></div>
-        <input
-          id="chat-input"
-          type="text"
-          placeholder="Type a message..."
-          maxlength="200"
-        />
-      </div>
+    <!-- Game Canvas Container -->
+    <div id="gameCanvasParent"></div>
 
     <footer>Created by Chris Eberle 2025</footer>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

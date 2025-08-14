@@ -6,6 +6,8 @@ import CoinUI from "../ui/CoinUI.js";
 import FishUI from "../ui/FishUI.js";
 import FishMiniGameUI from "../ui/FishMiniGameUI.js";
 import FishFactory from "../objects/fishing/FishFactory.js";
+import GameBarUI from "../ui/GameBarUI.js";
+import socket from "../network/socket.js";
 
 export default class UIScene extends Phaser.Scene {
   static instance = null;
@@ -15,16 +17,18 @@ export default class UIScene extends Phaser.Scene {
     this.coinUI = null;
     this.fishUI = null;
     this.fishMiniGameUI = null;
+    this.gameBarUI = null;
   }
 
   preload() {
-    this.load.image("coin", "./assets/ui/coin.png");
+    GameBarUI.preload(this);
+    CoinUI.preload(this);
     FishUI.preload(this);
     FishFactory.preloadAll(this);
     FishMiniGameUI.preload(this);
   }
 
-  create() {
+  create(data) {
     UIScene.instance = this;
 
     // Fish UI
@@ -36,5 +40,15 @@ export default class UIScene extends Phaser.Scene {
     // Player Stats UI
     const coinMargin = 100;
     this.coinUI = new CoinUI(this, coinMargin, coinMargin);
+
+    // GameBar
+    this.gameBarUI = new GameBarUI(this, sizes.width / 2, sizes.height - 50);
+    this.gameBarUI.setUsername(data?.username);
+
+    socket.on("chatMessage", (data) => {
+      if (UIScene.instance?.gameBarUI) {
+        UIScene.instance.gameBarUI.addChatMessage(data);
+      }
+    });
   }
 }

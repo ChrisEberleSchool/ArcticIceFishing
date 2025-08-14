@@ -26,6 +26,10 @@ export default class CoinUI {
     this.container.add([coinIcon, this.coinText]);
   }
 
+  static preload(scene) {
+    scene.load.image("coin", "./assets/ui/coin.png");
+  }
+
   updateCoinText(amount) {
     this.coinText.setText(amount.toString());
   }

@@ -1,66 +1,50 @@
 import "./style.css";
 import Phaser from "phaser";
-import GameScene from "./scenes/GameScene.js";
-import UIScene from "./scenes/UIScene.js";
 import socket from "./network/socket.js";
 import sizes from "./config/gameConfig.js";
 
-const config = {
-  type: Phaser.WEBGL,
-  width: sizes.width,
-  height: sizes.height,
-  canvas: document.getElementById("gameCanvas"),
-  pixelArt: true,
-  roundPixels: true,
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { y: 0 },
-      debug: false,
+import BootScene from "./scenes/BootScene.js";
+import AuthScene from "./scenes/AuthScene.js";
+import LoadingScene from "./scenes/LoadingScene.js";
+import GameScene from "./scenes/GameScene.js";
+import UIScene from "./scenes/UIScene.js";
+
+// ----------------------
+// Elements
+// ----------------------
+const landingPage = document.getElementById("landingPage");
+//const loginScreen = document.getElementById("loginScreen");
+const playBtn = document.getElementById("playNowBtn");
+const gameCanvasParent = document.getElementById("gameCanvasParent");
+
+// ----------------------
+// Play Now button
+// ----------------------
+playBtn.addEventListener("click", () => {
+  landingPage.style.display = "none";
+  gameCanvasParent.style.display = "block";
+
+  const config = {
+    type: Phaser.WEBGL,
+    width: sizes.width,
+    height: sizes.height,
+    parent: gameCanvasParent,
+    dom: { createContainer: true },
+    pixelArt: true,
+    roundPixels: true,
+    physics: { default: "arcade", arcade: { gravity: { y: 0 }, debug: false } },
+    scene: [BootScene, AuthScene, LoadingScene, GameScene, UIScene],
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-  },
-  scene: [],
-};
+  };
 
-// Create the Phaser game once on page load
-const game = new Phaser.Game(config);
+  const game = new Phaser.Game(config); // Phaser starts now
 
-document.getElementById("loginForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const isSignup = document.getElementById("authMode").value === "signup";
-
-  if (!username || !password) return alert("Both fields required");
-
-  const authEvent = isSignup ? "signup" : "login";
-  socket.emit(authEvent, { username, password });
-
-  socket.once("authSuccess", (data) => {
-    const uname = data?.username || username;
-
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("gameCanvas").style.display = "block";
-
-    if (!game.scene.getScene("scene-game")) {
-      game.scene.add("scene-game", GameScene, true, { username: uname }); // autoStart=true
-    } else {
-      game.scene.start("scene-game", { username: uname });
-    }
-
-    if (!game.scene.getScene("scene-ui")) {
-      game.scene.add("scene-ui", UIScene, false); // autoStart=false
-    }
-
-    if (!game.scene.isActive("scene-ui")) {
-      game.scene.start("scene-ui", UIScene, true); // launch parallel
-    }
-
-    game.scene.bringToTop("scene-ui");
-  });
-
-  socket.once("authError", (msg) => {
-    alert("Auth error: " + msg);
+  // Manually trigger Phaser to re-fit when window resizes
+  window.addEventListener("resize", () => {
+    // Use Phaser.Scale.FIT
+    game.scale.resize(sizes.width, sizes.height);
   });
 });

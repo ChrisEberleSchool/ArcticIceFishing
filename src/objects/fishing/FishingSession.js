@@ -258,9 +258,17 @@ export default class FishingSession {
   }
 
   stop() {
-    this.clearTimers();
+    this.clearTimers(); // removes biteTimer, tugEvent, updateEvent, catchTimer
 
-    // NO input event off here
+    // Extra safeguard: cancel any Phaser delayedCall callbacks immediately
+    if (this.biteTimer) {
+      this.biteTimer.remove(false);
+      this.biteTimer = null;
+    }
+    if (this.catchTimer) {
+      this.catchTimer.remove(false);
+      this.catchTimer = null;
+    }
 
     if (UIScene.instance && UIScene.instance.fishMiniGameUI) {
       UIScene.instance.fishMiniGameUI.destroy();

@@ -1,10 +1,21 @@
 import { fishingHoles } from "../state/fishingHoles.js";
 import prisma from "../db/prismaClient.js";
 
+// Store cooldown timestamps per tile
+const fishingCooldowns = {};
+
 export default function fishingHandler(socket, io) {
   socket.on("tryOccupyFishingHole", ({ x, y }) => {
     const key = `${x},${y}`;
+    const now = Date.now();
+
+    // Check if tile exists
     if (!(key in fishingHoles)) return socket.emit("occupyFailed", { x, y });
+
+    // Check if tile is on cooldown
+    if (fishingCooldowns[key] && fishingCooldowns[key] > now) {
+      return socket.emit("occupyFailed", { x, y });
+    }
 
     if (fishingHoles[key] === null) {
       fishingHoles[key] = socket.id;
@@ -19,12 +30,15 @@ export default function fishingHandler(socket, io) {
     const key = `${x},${y}`;
     if (fishingHoles[key] === socket.id) {
       fishingHoles[key] = null;
+
+      // Start a 2-second cooldown for this tile
+      fishingCooldowns[key] = Date.now() + 1000;
+
       io.emit("fishingHoleUpdate", { x, y, occupiedBy: null });
     }
   });
 
   socket.on("requestFishingHoleStates", () => {
-    // Send all fishing holes at once
     socket.emit("fishingHoleStates", fishingHoles);
   });
 
@@ -35,7 +49,6 @@ export default function fishingHandler(socket, io) {
     }
 
     try {
-      // Increment fishCaught and coins atomically
       await prisma.user.update({
         where: { id: socket.userId },
         data: {
@@ -44,7 +57,6 @@ export default function fishingHandler(socket, io) {
         },
       });
 
-      // Fetch existing biggest fish record for this fish type
       const existingFish = await prisma.BiggestFish.findUnique({
         where: {
           userId_fishName: {
@@ -55,7 +67,6 @@ export default function fishingHandler(socket, io) {
       });
 
       if (!existingFish) {
-        // Create new record since none exists
         await prisma.BiggestFish.create({
           data: {
             userId: socket.userId,
@@ -66,7 +77,6 @@ export default function fishingHandler(socket, io) {
           },
         });
       } else if (fishData.length > existingFish.length) {
-        // Update only if new fish is bigger
         await prisma.BiggestFish.update({
           where: { id: existingFish.id },
           data: {
@@ -98,6 +108,10 @@ export function onDisconnect(socket, io) {
   for (const key in fishingHoles) {
     if (fishingHoles[key] === socket.id) {
       fishingHoles[key] = null;
+
+      // Start cooldown on disconnect as well
+      fishingCooldowns[key] = Date.now() + 2000;
+
       const [x, y] = key.split(",").map(Number);
       io.emit("fishingHoleUpdate", { x, y, occupiedBy: null });
     }

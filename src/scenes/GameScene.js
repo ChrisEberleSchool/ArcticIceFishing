@@ -27,6 +27,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.image("spenn", "./assets/Spen.png"); // load your PNG file
     this.load.image("dena", "./assets/Dena.png"); // load your PNG file
+    console.log("GAME SCENE STARTED");
   }
 
   create(data) {
@@ -96,33 +97,6 @@ export default class GameScene extends Phaser.Scene {
     myImageSprite1.setOrigin(originX, originY);
     myImageSprite1.setDisplaySize(width, height);
 
-    const chatInput = document.getElementById("chat-input");
-    chatInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && chatInput.value.trim() !== "") {
-        console.log("Sending chat message:", chatInput.value); // ← Add this
-        this.socket.emit("chatMessage", {
-          username,
-          message: chatInput.value.trim(),
-        });
-        chatInput.value = "";
-      }
-    });
-
-    // Listen for incoming chat messages
-    this.socket.on("chatMessage", ({ username, message }) => {
-      const chatLog = document.getElementById("chat-log");
-      const msgElement = document.createElement("div");
-      msgElement.textContent = `${username}: ${message}`;
-      chatLog.appendChild(msgElement);
-      chatLog.scrollTop = chatLog.scrollHeight; // auto-scroll
-    });
-
-    this.input.keyboard.on("keydown", (event) => {
-      if (document.activeElement === chatInput) {
-        event.stopPropagation(); // prevent Phaser from receiving input
-      }
-    });
-
     // leaderboard
     this.leaderboard = new Leaderboard(this, 280, 10);
     socket.emit("requestLeaderboard");
@@ -136,6 +110,14 @@ export default class GameScene extends Phaser.Scene {
       delay: 30000,
       callback: () => socket.emit("requestLeaderboard"),
       loop: true,
+    });
+
+    // Listen for GameBar exit from UIScene
+    this.events.on("gameBarExit", () => {
+      if (this.localPlayer && this.localPlayer.fishing) {
+        this.localPlayer.stopFishing();
+        console.log("Player stopped fishing due to GameBar exit.");
+      }
     });
   }
 

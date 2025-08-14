@@ -5,28 +5,27 @@ export default class FishingTileEvents {
     this.worldGrid = worldGrid;
     this.player = player;
 
-    // In FishingTileEvents constructor
+    this.currentTileKey = null; // tile we occupy
+    this.attemptingTileKey = null; // tile we're trying to occupy
+
     this.socket.on("fishingHoleStates", (allFishingHoles) => {
       for (const key in allFishingHoles) {
         const [x, y] = key.split(",").map(Number);
         const tile = this.worldGrid.getFishingTileAt(x, y);
-        if (tile) {
-          tile.isOccupied = allFishingHoles[key] !== null;
-        }
+        if (tile) tile.isOccupied = allFishingHoles[key] !== null;
       }
     });
 
-    // Listen for fishing hole occupancy updates from the server
     this.socket.on("fishingHoleUpdate", ({ x, y, occupiedBy }) => {
       const tile = this.worldGrid.getFishingTileAt(x, y);
-      if (tile) {
-        tile.isOccupied = occupiedBy !== null;
-      }
+      if (tile) tile.isOccupied = occupiedBy !== null;
     });
 
-    // Listen for occupation success (only for this player)
     this.socket.on("occupySuccess", ({ x, y }) => {
-      this.player.fishing = true;
+      const key = `${x},${y}`;
+      this.currentTileKey = key;
+      this.attemptingTileKey = null; // clear in-progress attempt
+
       const tile = this.worldGrid.getFishingTileAt(x, y);
       if (tile) {
         this.player.currentFishingTile = tile;
@@ -35,11 +34,10 @@ export default class FishingTileEvents {
       }
     });
 
-    // Listen for occupation failure (only for this player)
     this.socket.on("occupyFailed", ({ x, y }) => {
-      // Optional: Show some UI feedback that the hole is occupied
+      const key = `${x},${y}`;
       console.log("Fishing hole is occupied!");
-      // You can add code to show interactText message here
+
       if (this.player.interactText) {
         this.player.interactText.setText("Hole is Occupied");
         this.player.interactText.setVisible(true);
@@ -47,19 +45,31 @@ export default class FishingTileEvents {
         this.player.interactText.y =
           this.player.sprite.y + this.player.NameTagOffset;
       }
+
+      if (this.attemptingTileKey === key) this.attemptingTileKey = null;
     });
   }
 
   tryOccupyFishingTile(worldX, worldY) {
     const { x, y } = this.worldGrid.WorldCoordinatesToGrid(worldX, worldY);
+    const key = `${x},${y}`;
+
+    // Only attempt if not already occupying or trying this tile
+    if (this.currentTileKey === key || this.attemptingTileKey === key) return;
+
     console.log("Attempting to occupy fishing hole at grid:", x, y);
+    this.attemptingTileKey = key;
     this.socket.emit("tryOccupyFishingHole", { x, y });
   }
 
   releaseFishingTile() {
-    if (!this.player.currentFishingTile) return;
-    const { x, y } = this.player.currentFishingTile.GridPos;
+    if (!this.currentTileKey) return;
+
+    const [x, y] = this.currentTileKey.split(",").map(Number);
     this.socket.emit("releaseFishingHole", { x, y });
+
+    this.currentTileKey = null;
+    this.attemptingTileKey = null;
     this.player.fishing = false;
     this.player.currentFishingTile = null;
   }

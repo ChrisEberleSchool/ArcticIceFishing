@@ -37,10 +37,6 @@ export default class Player {
       this
     );
 
-    this.fKey = this.scene.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.F
-    );
-
     this.socket.emit("requestFishingHoleStates");
 
     // ANIMATION PRELOADING
@@ -65,22 +61,11 @@ export default class Player {
     this.scene.cameras.main.startFollow(this.sprite);
     this.scene.cameras.main.zoom = 4.5;
 
-    this.interactText = this.scene.add
-      .text(
-        this.sprite.x,
-        this.sprite.y + this.NameTagOffset,
-        "Press F to Start Fishing!",
-        {
-          fontSize: "8px",
-          color: "#00ffff", // neon cyan-ish
-          fontFamily: "'Orbitron', monospace", // sci-fi style font
-          stroke: "#003344",
-          strokeThickness: 2,
-          letterSpacing: 1,
-        }
-      )
-      .setOrigin(0.5);
-    this.interactText.setVisible(false);
+    this.scene.events.on("playerStartedFishing", () => {
+      if (UIScene.instance?.gameBarUI) {
+        UIScene.instance.gameBarUI.showExitButton();
+      }
+    });
   }
 
   createNameText(scene) {
@@ -258,34 +243,23 @@ export default class Player {
     this.nameText.x = this.sprite.x;
     this.nameText.y = this.sprite.y - this.NameTagOffset;
 
+    // Determine current tile
     const { x: gridX, y: gridY } = this.scene.worldGrid.WorldCoordinatesToGrid(
       this.x,
       this.y
     );
+
     const fishingTile = this.scene.worldGrid.getFishingTileAt(gridX, gridY);
+    const currentTileKey = fishingTile ? `${gridX},${gridY}` : null;
 
+    // --- Only try to occupy when stepping on a new tile ---
     if (fishingTile && !this.fishing) {
-      this.stopFishing();
-      if (fishingTile.isOccupied) {
-        this.interactText.setText("Hole is Occupied");
-      } else {
-        this.interactText.setText("Press F to Start Fishing!");
+      if (currentTileKey !== this.lastFishingTileKey) {
+        this.fishingTileEvents.tryOccupyFishingTile(this.x, this.y);
+        this.lastFishingTileKey = currentTileKey;
       }
-      this.interactText.setVisible(true);
-      this.interactText.x = this.sprite.x;
-      this.interactText.y = this.sprite.y + this.NameTagOffset;
     } else {
-      this.interactText.setVisible(false);
-    }
-
-    if (Phaser.Input.Keyboard.JustDown(this.fKey)) {
-      if (this.fishing) {
-        this.stopFishing();
-      } else {
-        if (this.scene.worldGrid.isOnFishingTile(this.x, this.y)) {
-          this.fishingTileEvents.tryOccupyFishingTile(this.x, this.y);
-        }
-      }
+      this.lastFishingTileKey = null;
     }
 
     // if already fishing return
@@ -369,6 +343,8 @@ export default class Player {
 
     // Create and start a new FishingSession
     this.fishingSession = new FishingSession(this.scene, this, fishingTile);
+
+    this.scene.events.emit("playerStartedFishing");
   }
 
   stopFishing() {
