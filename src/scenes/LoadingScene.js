@@ -3,22 +3,51 @@ import Phaser from "phaser";
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
     super("LoadingScene");
+    this.loadingSprite = null;
+    this.username = "Guest";
+  }
+
+  init(data) {
+    // Init runs before preload, so we set username here
+    this.username = data?.username || "Guest";
   }
 
   preload() {
     const { width, height } = this.scale;
 
-    // Background
+    // Background + progress bar
     this.cameras.main.setBackgroundColor(0x222222);
-
-    // Create border bar
     const border = this.add.graphics();
     border.lineStyle(4, 0xffffff, 1);
     border.strokeRect(width / 2 - 200, height / 2 - 25, 400, 50);
-
-    // Create progress fill bar
     const progressBar = this.add.graphics();
 
+    // Load loading animation first
+    this.load.spritesheet("loading", "./assets/ui/loading/loadingScreen.png", {
+      frameWidth: 40,
+      frameHeight: 18,
+    });
+
+    // Once the loading sprite is ready, start animating
+    this.load.once("filecomplete-spritesheet-loading", () => {
+      this.anims.create({
+        key: "loading",
+        frames: this.anims.generateFrameNumbers("loading", {
+          start: 0,
+          end: 5,
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
+      this.loadingSprite = this.add.sprite(
+        width / 2,
+        height / 2 + 100,
+        "loading"
+      );
+      this.loadingSprite.play("loading");
+    });
+
+    // Progress bar updates
     this.load.on("progress", (value) => {
       progressBar.clear();
       progressBar.fillStyle(0x00ff00, 1);
@@ -30,30 +59,22 @@ export default class LoadingScene extends Phaser.Scene {
       this.startGame();
     });
 
-    // Example: preload actual game assets
+    // Heavy assets
     this.load.image("tiles", "./assets/mapAssets/spritesheet.png");
-    this.load.image("spenn", "./assets/Spen.png"); // load your PNG file
-    this.load.image("dena", "./assets/Dena.png"); // load your PNG file
+    this.load.image("spenn", "./assets/Spen.png");
+    this.load.image("dena", "./assets/Dena.png");
     this.load.tilemapTiledJSON("map1", "./assets/mapAssets/map1.json");
-
-    // TODO: Load other assets for your GameScene/UI
-  }
-
-  create(data) {
-    this.username = data?.username;
-
-    this.startGame();
   }
 
   startGame() {
-    if (!this.username) {
-      console.error("Missing username for GameScene!");
-      return;
+    // Destroy loading sprite before leaving
+    if (this.loadingSprite) {
+      this.loadingSprite.destroy();
     }
 
+    // Switch to the game
     this.scene.start("scene-game", { username: this.username });
 
-    // Launch UI scene
     if (!this.scene.isActive("scene-ui")) {
       this.scene.launch("scene-ui", { username: this.username });
     }
