@@ -41,12 +41,30 @@ export default class LoadingScene extends Phaser.Scene {
   }
 
   create() {
+    const { width, height } = this.scale;
+
+    // Add and animate loading sprite
+    const loadingSprite = this.add.sprite(
+      width / 2,
+      height / 2 - 80,
+      "loading"
+    );
+
+    this.anims.create({
+      key: "loadingAnim",
+      frames: this.anims.generateFrameNumbers("loading", { start: 0, end: 5 }),
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    loadingSprite.play("loadingAnim");
+
     // Launch UIScene first
     this.scene.launch("scene-ui", { username: this.username });
 
     const uiScene = this.scene.get("scene-ui");
 
-    // Wait for UIScene to finish creating coinUI before starting GameScene
+    // Wait for UIScene to finish creating gameBarUI before starting GameScene
     this.time.addEvent({
       delay: 50,
       loop: true,
