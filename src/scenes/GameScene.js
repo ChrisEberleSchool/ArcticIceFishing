@@ -22,6 +22,7 @@ export default class GameScene extends Phaser.Scene {
 
   preload() {
     Player.preload(this);
+
     console.log("GAME SCENE STARTED");
   }
 
@@ -66,9 +67,12 @@ export default class GameScene extends Phaser.Scene {
         this.localPlayer.setPosition(playerData.x, playerData.y);
         this.localPlayer.coins = playerData.coins;
         this.localPlayer.fishCaught = playerData.fishCaught;
-        this.scene
-          .get("scene-ui")
-          .coinUI.updateCoinText(this.localPlayer.coins);
+
+        // Safe coinUI update
+        const uiScene = this.scene.get("scene-ui");
+        if (uiScene?.coinUI) {
+          uiScene.coinUI.updateCoinText(this.localPlayer.coins);
+        }
       }
     });
 
