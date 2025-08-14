@@ -57,7 +57,7 @@ header nav a:hover {
   flex-direction: column;
   justify-content: space-between; /* top text, bottom button */
   align-items: center;
-  background: url("./assets/bg.png") no-repeat center center;
+  background: url("/assets/bg.png") no-repeat center center;
   background-size: 30% auto; /* half size */
   text-align: center;
   padding: 20px 0; /* some vertical padding */
