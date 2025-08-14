@@ -41,6 +41,14 @@ export default class AuthScene extends Phaser.Scene {
     // open the landing page first
     this.landingPage.open();
 
+    socket.on("authSuccess", (data) => {
+      this.scene.scene.start("LoadingScene", { username: data.username });
+    });
+
+    socket.on("authError", (msg) => {
+      alert("Login failed: " + msg);
+    });
+
     this.events.on("shutdown", () => {
       this.landingPage?.destroy?.();
       this.loginPage?.destroy?.();

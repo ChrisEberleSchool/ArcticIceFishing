@@ -110,14 +110,6 @@ export default class SignupPage {
     scene.scale.on("resize", this.resizeListener);
 
     this.close();
-
-    socket.on("authSuccess", (data) => {
-      this.scene.scene.start("LoadingScene", { username: data.username });
-    });
-
-    socket.on("authError", (msg) => {
-      alert("Login failed: " + msg);
-    });
   }
 
   // Lock DOM element size & position relative to canvas
