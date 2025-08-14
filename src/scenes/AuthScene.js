@@ -42,7 +42,7 @@ export default class AuthScene extends Phaser.Scene {
     this.landingPage.open();
 
     socket.on("authSuccess", (data) => {
-      this.scene.scene.start("LoadingScene", { username: data.username });
+      this.scene.start("LoadingScene", { username: data.username });
     });
 
     socket.on("authError", (msg) => {

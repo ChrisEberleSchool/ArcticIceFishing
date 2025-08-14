@@ -143,7 +143,7 @@ export default class LoginPage {
         height - this.verticalButtonOffset
       );
       this.backBtn.setPosition(
-        horizontalButtonOffset,
+        this.horizontalButtonOffset,
         height - this.verticalButtonOffset
       );
     };

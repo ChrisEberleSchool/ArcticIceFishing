@@ -10,13 +10,13 @@ export default class LoginSignupPage {
     this.bg.displayHeight = scene.sys.game.config.height;
 
     // Buttons
-    const horizontalButtonOffset = 500;
-    const verticalButtonOffset = 200;
+    this.horizontalButtonOffset = 500;
+    this.verticalButtonOffset = 200;
 
     this.loginBtn = scene.add
       .image(
-        scene.sys.game.config.width - horizontalButtonOffset,
-        scene.sys.game.config.height - verticalButtonOffset,
+        scene.sys.game.config.width - this.horizontalButtonOffset,
+        scene.sys.game.config.height - this.verticalButtonOffset,
         "0loginButton"
       )
       .setOrigin(0.5, 0.5)
@@ -29,8 +29,8 @@ export default class LoginSignupPage {
 
     this.createBtn = scene.add
       .image(
-        horizontalButtonOffset,
-        scene.sys.game.config.height - verticalButtonOffset,
+        this.horizontalButtonOffset,
+        scene.sys.game.config.height - this.verticalButtonOffset,
         "0createButton"
       )
       .setOrigin(0.5, 0.5)
