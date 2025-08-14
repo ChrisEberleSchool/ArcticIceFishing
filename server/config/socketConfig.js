@@ -35,6 +35,12 @@ export default function socketConfig(io) {
       fishingOnDisconnect(socket, io);
       playerOnDisconnect(socket, io);
     });
+
+    // Client error listener
+    socket.on("clientError", (errorData) => {
+      console.error(`Client error from ${socket.id}:`, errorData);
+      // Optional: store in a database or log file
+    });
   });
 
   startPeriodicCleanup(io);

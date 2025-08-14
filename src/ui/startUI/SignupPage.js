@@ -187,7 +187,11 @@ export default class SignupPage {
       return alert("Both fields required");
     }
 
-    socket.emit("signup", { username, password });
+    try {
+      socket.emit("signup", { username, password });
+    } catch (err) {
+      socket.emit("clientError", { message: err.message, stack: err.stack });
+    }
   }
 
   destroy() {

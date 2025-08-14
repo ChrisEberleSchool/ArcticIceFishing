@@ -9,6 +9,27 @@ import LoadingScene from "./scenes/LoadingScene.js";
 import GameScene from "./scenes/GameScene.js";
 import UIScene from "./scenes/UIScene.js";
 
+// Catch global JS errors
+window.onerror = function (message, source, lineno, colno, error) {
+  socket.emit("clientError", {
+    message,
+    source,
+    line: lineno,
+    column: colno,
+    stack: error?.stack,
+    userAgent: navigator.userAgent,
+  });
+};
+
+// Catch unhandled promise rejections
+window.addEventListener("unhandledrejection", function (event) {
+  socket.emit("clientError", {
+    message: event.reason?.message || event.reason,
+    stack: event.reason?.stack,
+    userAgent: navigator.userAgent,
+  });
+});
+
 // ----------------------
 // Elements
 // ----------------------

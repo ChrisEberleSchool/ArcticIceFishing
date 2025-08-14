@@ -170,7 +170,11 @@ export default class LoginPage {
     const password = this.loginForm.getChildByID("passwordLogin").value.trim();
     if (!username || !password) return alert("Both fields required");
 
-    socket.emit("login", { username, password });
+    try {
+      socket.emit("login", { username, password });
+    } catch (err) {
+      socket.emit("clientError", { message: err.message, stack: err.stack });
+    }
   }
 
   // Lock DOM element size & position relative to canvas
