@@ -21,12 +21,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("tiles", "./assets/mapAssets/spritesheet.png");
-    this.load.tilemapTiledJSON("map1", "./assets/mapAssets/map1.json");
     Player.preload(this);
-
-    this.load.image("spenn", "./assets/Spen.png"); // load your PNG file
-    this.load.image("dena", "./assets/Dena.png"); // load your PNG file
     console.log("GAME SCENE STARTED");
   }
 
