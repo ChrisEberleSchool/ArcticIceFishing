@@ -13,13 +13,13 @@ export default class LoginPage {
     this.bg.displayHeight = gameHeight;
 
     // Buttons
-    const horizontalButtonOffset = 650;
-    const verticalButtonOffset = 100;
+    this.horizontalButtonOffset = 650;
+    this.verticalButtonOffset = 100;
 
     this.loginBtn = scene.add
       .image(
-        gameWidth - horizontalButtonOffset,
-        gameHeight - verticalButtonOffset,
+        gameWidth - this.horizontalButtonOffset,
+        gameHeight - this.verticalButtonOffset,
         "1loginButton"
       )
       .setOrigin(0.5, 0.5)
@@ -31,8 +31,8 @@ export default class LoginPage {
 
     this.backBtn = scene.add
       .image(
-        horizontalButtonOffset,
-        gameHeight - verticalButtonOffset,
+        this.horizontalButtonOffset,
+        gameHeight - this.verticalButtonOffset,
         "1backButton"
       )
       .setOrigin(0.5, 0.5)
@@ -99,12 +99,12 @@ export default class LoginPage {
 
       // Adjust buttons
       this.loginBtn.setPosition(
-        width - horizontalButtonOffset,
-        height - verticalButtonOffset
+        width - this.horizontalButtonOffset,
+        height - this.verticalButtonOffset
       );
       this.backBtn.setPosition(
-        horizontalButtonOffset,
-        height - verticalButtonOffset
+        this.horizontalButtonOffset,
+        height - this.verticalButtonOffset
       );
     };
 
@@ -112,6 +112,14 @@ export default class LoginPage {
     scene.scale.on("resize", this.resizeListener);
 
     this.close();
+
+    socket.on("authSuccess", (data) => {
+      this.scene.scene.start("LoadingScene", { username: data.username });
+    });
+
+    socket.on("authError", (msg) => {
+      alert("Login failed: " + msg);
+    });
   }
 
   static preload(scene) {
@@ -139,12 +147,12 @@ export default class LoginPage {
 
       // Adjust buttons
       this.loginBtn.setPosition(
-        width - horizontalButtonOffset,
-        height - verticalButtonOffset
+        width - this.horizontalButtonOffset,
+        height - this.verticalButtonOffset
       );
       this.backBtn.setPosition(
         horizontalButtonOffset,
-        height - verticalButtonOffset
+        height - this.verticalButtonOffset
       );
     };
 
@@ -171,10 +179,6 @@ export default class LoginPage {
     if (!username || !password) return alert("Both fields required");
 
     socket.emit("login", { username, password });
-    socket.once("authSuccess", (data) =>
-      this.scene.scene.start("LoadingScene", { username: data.username })
-    );
-    socket.once("authError", (msg) => alert("Login failed: " + msg));
   }
 
   // Lock DOM element size & position relative to canvas

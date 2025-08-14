@@ -4,22 +4,22 @@ export default class SignupPage {
   constructor(scene) {
     this.scene = scene;
 
-    const gameWidth = scene.sys.game.config.width;
-    const gameHeight = scene.sys.game.config.height;
+    this.gameWidth = scene.sys.game.config.width;
+    this.gameHeight = scene.sys.game.config.height;
 
     // Background
     this.bg = scene.add.image(0, 0, "signupBg").setOrigin(0).setVisible(false);
-    this.bg.displayWidth = gameWidth;
-    this.bg.displayHeight = gameHeight;
+    this.bg.displayWidth = this.gameWidth;
+    this.bg.displayHeight = this.gameHeight;
 
     // Buttons
-    const horizontalButtonOffset = 650;
-    const verticalButtonOffset = 100;
+    this.horizontalButtonOffset = 650;
+    this.verticalButtonOffset = 100;
 
     this.signupBtn = scene.add
       .image(
-        gameWidth - horizontalButtonOffset,
-        gameHeight - verticalButtonOffset,
+        this.gameWidth - this.horizontalButtonOffset,
+        this.gameHeight - this.verticalButtonOffset,
         "signupButton"
       )
       .setOrigin(0.5, 0.5)
@@ -31,8 +31,8 @@ export default class SignupPage {
 
     this.backBtn = scene.add
       .image(
-        horizontalButtonOffset,
-        gameHeight - verticalButtonOffset,
+        this.horizontalButtonOffset,
+        this.gameHeight - this.verticalButtonOffset,
         "signupBackButton"
       )
       .setOrigin(0.5, 0.5)
@@ -45,7 +45,7 @@ export default class SignupPage {
 
     // DOM form (Phaser-managed positioning)
     this.signupForm = scene.add
-      .dom(gameWidth / 2, gameHeight / 2)
+      .dom(this.gameWidth / 2, this.gameHeight / 2)
       .createFromHTML(
         `
         <div style="display:flex; flex-direction:column; gap:200px; align-items:center;">
@@ -82,7 +82,7 @@ export default class SignupPage {
       .setVisible(false);
 
     // Ensure Phaser uses its internal transform matrix to lock it to canvas
-    this.updateDomPosition(gameWidth, gameHeight);
+    this.updateDomPosition(this.gameWidth, this.gameHeight);
 
     // Keep DOM element in sync with game size
     this.resizeListener = (gameSize) => {
@@ -97,12 +97,12 @@ export default class SignupPage {
 
       // Adjust buttons
       this.signupBtn.setPosition(
-        width - horizontalButtonOffset,
-        height - verticalButtonOffset
+        width - this.horizontalButtonOffset,
+        height - this.verticalButtonOffset
       );
       this.backBtn.setPosition(
-        horizontalButtonOffset,
-        height - verticalButtonOffset
+        this.horizontalButtonOffset,
+        height - this.verticalButtonOffset
       );
     };
 
@@ -110,6 +110,14 @@ export default class SignupPage {
     scene.scale.on("resize", this.resizeListener);
 
     this.close();
+
+    socket.on("authSuccess", (data) => {
+      this.scene.scene.start("LoadingScene", { username: data.username });
+    });
+
+    socket.on("authError", (msg) => {
+      alert("Login failed: " + msg);
+    });
   }
 
   // Lock DOM element size & position relative to canvas
@@ -151,11 +159,11 @@ export default class SignupPage {
       // Adjust buttons
       this.signupBtn.setPosition(
         width - horizontalButtonOffset,
-        height - verticalButtonOffset
+        height - this.verticalButtonOffset
       );
       this.backBtn.setPosition(
         horizontalButtonOffset,
-        height - verticalButtonOffset
+        height - this.verticalButtonOffset
       );
     };
 
@@ -188,14 +196,6 @@ export default class SignupPage {
     }
 
     socket.emit("signup", { username, password });
-
-    socket.once("authSuccess", (data) => {
-      this.scene.scene.start("LoadingScene", { username: data.username });
-    });
-
-    socket.once("authError", (msg) => {
-      alert("Signup failed: " + msg);
-    });
   }
 
   destroy() {
