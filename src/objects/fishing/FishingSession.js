@@ -200,6 +200,35 @@ export default class FishingSession {
         reward: this.currentFish.reward,
       });
 
+      let color = "red"; // use let so it can change
+      switch (this.currentFish.tier) {
+        case "rare":
+          color = "red";
+          break;
+        case "legendary":
+          color = "gold";
+          break;
+        default:
+          color = "white";
+          break;
+      }
+
+      // If fish is rare or greater emit server message to all clients
+      if (
+        this.currentFish.tier == "rare" ||
+        this.currentFish.tier == "legendary"
+      ) {
+        // --- BROADCAST SERVER MESSAGE ---
+        this.player.socket.emit("serverMessageRequest", {
+          message: `🎉 **${
+            this.player.username || "A player"
+          }** just reeled in a **${this.currentFish.tier.toUpperCase()}** ${
+            this.currentFish.name
+          }! 🐟`,
+          color: color, // use gold for fish caught messages
+        });
+      }
+
       // Optionally also emit your existing playerStats update, or you could skip it if server fishCaught update is sufficient
       this.player.socket.emit("playerStats", {
         coins: this.player.coins,

@@ -3,6 +3,7 @@
   --card-bg: #1e1e2f;
   --text-color: #e0e0e0;
   --accent-color: #4fc3f7;
+  --accent-hover: #3aa0d9;
   --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -15,7 +16,7 @@
 
 body {
   font-family: var(--font-family);
-  background-color: var(--bg-color);
+  background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
   color: var(--text-color);
   display: flex;
   flex-direction: column;
@@ -24,41 +25,74 @@ body {
 
 header {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   background: var(--card-bg);
-  padding: 15px;
+  padding: 15px 40px;
   box-shadow: 0 4px 10px rgba(79, 195, 247, 0.4);
 }
 
-.nav-bar {
-  cursor: pointer;
-  font-weight: 600;
+header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
   color: var(--accent-color);
 }
 
-#landingPage main {
+header nav a {
+  margin-left: 25px;
+  font-weight: 600;
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+header nav a:hover {
+  color: var(--accent-hover);
+}
+
+/* Landing Page */
+#landingPage {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between; /* top text, bottom button */
   align-items: center;
+  background: url("./assets/bg.png") no-repeat center center;
+  background-size: 30% auto; /* half size */
+  text-align: center;
+  padding: 20px 0; /* some vertical padding */
+}
+.landing-content {
+  margin-top: 15px; /* space below header */
+}
+
+.landing-content h1 {
+  font-size: 3rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.landing-content p {
+  font-size: 1.25rem;
+  margin: 20px 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 #playNowBtn {
   font-size: 2rem;
-  padding: 20px 50px;
+  padding: 20px 60px;
   border: none;
-  border-radius: 12px;
-  background-color: var(--accent-color);
+  border-radius: 20px;
+  background: linear-gradient(90deg, #4fc3f7, #00bcd4);
   color: var(--bg-color);
   cursor: pointer;
-  box-shadow: 0 6px 12px rgba(79, 195, 247, 0.4);
-  transition: transform 0.15s ease, background-color 0.3s ease;
+  box-shadow: 0 8px 15px rgba(79, 195, 247, 0.5);
+  margin-bottom: 15px; /* distance from footer */
 }
 
 #playNowBtn:hover {
-  transform: translateY(-3px);
-  background-color: #3aa0d9;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(79, 195, 247, 0.6);
+  background: linear-gradient(90deg, #00bcd4, #4fc3f7);
 }
 
 #gameCanvasParent {
@@ -71,12 +105,13 @@ header {
 #gameCanvasParent canvas {
   display: block;
 }
-
 footer {
   text-align: center;
   font-size: 0.85rem;
   color: #66688e;
-  padding: 10px;
+  padding: 15px;
   user-select: none;
   letter-spacing: 0.8px;
+  background: var(--card-bg);
+  box-shadow: 0 -4px 10px rgba(79, 195, 247, 0.2);
 }

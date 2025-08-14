@@ -1,4 +1,5 @@
 import "./style.css";
+import "./aboutStyles.css";
 import Phaser from "phaser";
 import socket from "./network/socket.js";
 import sizes from "./config/gameConfig.js";

@@ -18,6 +18,8 @@ export default class UIScene extends Phaser.Scene {
     this.fishUI = null;
     this.fishMiniGameUI = null;
     this.gameBarUI = null;
+    this.keyW = null;
+    this.username = null;
   }
 
   preload() {
@@ -29,6 +31,7 @@ export default class UIScene extends Phaser.Scene {
   }
 
   create(data) {
+    this.username = data?.username;
     UIScene.instance = this;
 
     // Fish UI
@@ -43,7 +46,7 @@ export default class UIScene extends Phaser.Scene {
 
     // GameBar
     this.gameBarUI = new GameBarUI(this, sizes.width / 2, sizes.height - 50);
-    this.gameBarUI.setUsername(data?.username);
+    this.gameBarUI.setUsername(this.username);
 
     socket.on("chatMessage", (data) => {
       if (UIScene.instance?.gameBarUI) {
@@ -51,4 +54,6 @@ export default class UIScene extends Phaser.Scene {
       }
     });
   }
+
+  update() {}
 }

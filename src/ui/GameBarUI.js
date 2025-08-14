@@ -160,12 +160,12 @@ export default class GameBarUI {
       .dom(gameWidth - 10, 10)
       .createFromHTML(
         `<div id="chatLog" style="
-      width: 300px;
-      height: 400px;
+      width: 500px;
+      height: 250px;
       overflow-y: auto;
       background: rgba(0,0,0,0.5);
       color: white;
-      font-size: 18px;
+      font-size: 24px;
       padding: 10px;
       border-radius: 8px;
       display: flex;
@@ -229,9 +229,9 @@ export default class GameBarUI {
     const message = input.value.trim();
 
     if (!message) return;
-
+    const color = "white";
     const username = this.username;
-    this.socket.emit("chatMessage", { username, message });
+    this.socket.emit("chatMessage", { username, message, color });
     console.log("sent message");
     input.value = ""; // clear input after sending
   }
@@ -240,11 +240,18 @@ export default class GameBarUI {
     this.username = username;
   }
 
-  addChatMessage({ username, message }) {
+  addChatMessage({ username, message, color }) {
     if (!this.chatLog) return;
     const logNode = this.chatLog.getChildByID("chatLog");
     const msgDiv = document.createElement("div");
-    msgDiv.textContent = `${username}: ${message}`;
+
+    // If a color is provided, wrap message in a span
+    if (color) {
+      msgDiv.innerHTML = `<span style="color:${color};">${username}: ${message}</span>`;
+    } else {
+      msgDiv.innerHTML = `${username}: ${message}`;
+    }
+
     logNode.appendChild(msgDiv);
     logNode.scrollTop = logNode.scrollHeight; // auto-scroll to bottom
   }

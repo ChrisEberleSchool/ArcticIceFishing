@@ -1,0 +1,62 @@
+:root {
+  --bg-color: #121214;
+  --card-bg: #1e1e2f;
+  --text-color: #e0e0e0;
+  --accent-color: #4fc3f7;
+  --accent-hover: #3aa0d9;
+  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#aboutPage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+}
+
+.about-content {
+  max-width: 800px;
+  background: rgba(30, 30, 47, 0.8);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(79, 195, 247, 0.3);
+}
+
+.about-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--accent-color);
+}
+
+.about-content h2 {
+  font-size: 1.75rem;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  color: #aad8f7;
+}
+
+.about-content p {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.about-content ul {
+  list-style: disc inside;
+  font-size: 1.2rem;
+  text-align: left;
+  margin: 0 auto 20px auto;
+  max-width: 600px;
+}
+
+.about-content a {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+.about-content a:hover {
+  color: var(--accent-hover);
+}
