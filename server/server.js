@@ -2,6 +2,7 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import socketConfig from "./config/socketConfig.js";
+import helmet from "helmet";
 
 const app = express();
 
@@ -15,27 +16,20 @@ app.use((req, res, next) => {
   res.redirect(`https://${req.headers.host}${req.url}`);
 });
 
-// ✅ Add security headers including HSTS
+// ✅ Apply Helmet with custom HSTS
 app.use(
-  helmet.hsts({
-    maxAge: 31536000, // 1 year in seconds
-    includeSubDomains: true,
-    preload: true,
-  })
-);
-
-// ✅ Add security headers including HSTS
-app.use(
-  helmet.hsts({
-    maxAge: 31536000, // 1 year in seconds
-    includeSubDomains: true,
-    preload: true,
+  helmet({
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
   })
 );
 
 const server = http.createServer(app);
 
 const io = new Server(server, { cors: { origin: "*" } });
-socketConfig(io); // pass io to your socket setup
+socketConfig(io);
 
 export default server;
