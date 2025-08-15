@@ -17,6 +17,7 @@ import LakeSturgeon from "./FishTypes/rare/LakeSturgeon.js";
 // Legendary Fish
 import BlueFinTuna from "./FishTypes/legendary/BlueFinTuna.js";
 import DollyVarden from "./FishTypes/legendary/DollyVarden.js";
+import Arapaima from "./FishTypes/legendary/Arapaima.js";
 
 const ALL_FISH = [
   RainbowTrout,
@@ -34,13 +35,14 @@ const ALL_FISH = [
 
   BlueFinTuna,
   DollyVarden,
+  Arapaima,
 ];
 
 const TIER_SPAWN_WEIGHTS = {
-  common: 50,
-  uncommon: 30,
-  rare: 15,
-  legendary: 5,
+  common: 40,
+  uncommon: 34,
+  rare: 18,
+  legendary: 8,
 };
 
 export default class FishFactory {

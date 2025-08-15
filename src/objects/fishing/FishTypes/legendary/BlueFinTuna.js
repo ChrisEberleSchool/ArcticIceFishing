@@ -7,7 +7,7 @@ export default class BlueFinTuna extends Fish {
       spriteKey: "blueFinTunaSprite",
       spritePath: "./assets/ui/FishUi/legendary/blueFinTuna.png",
       lengthRange: [50, 150],
-      baseFishSpeed: 1.2,
+      baseFishSpeed: 1.1,
       rewardPerInch: 50,
       allowedEquipment: ["basicRod", "advancedRod"],
       tier: "legendary",
