@@ -61,11 +61,11 @@ export default class FishingSession {
     this.biteTimer = this.scene.time.delayedCall(
       Phaser.Math.Between(3000, 7000),
       () => {
+        if (!this.player.fishing || this.fightActive) return;
         console.log(
           "Bite timer triggered. Player fishing?",
           this.player.fishing
         );
-        if (!this.player.fishing || this.fightActive) return;
         this.startFight();
       }
     );
@@ -307,5 +307,18 @@ export default class FishingSession {
     this.player.fishing = false;
     this.player.fishingState = null;
     this.fightActive = false;
+
+    console.log("Waiting for bite EXIT!");
+  }
+
+  stopTimersOnly() {
+    this.clearTimers(); // clear biteTimer, tugEvent, updateEvent, catchTimer
+    this.fightActive = false;
+    this.player.fishingState = null;
+    if (UIScene.instance?.fishMiniGameUI) {
+      UIScene.instance.fishMiniGameUI.destroy();
+      UIScene.instance.fishMiniGameUI = null;
+    }
+    this.waitingForBite = false;
   }
 }

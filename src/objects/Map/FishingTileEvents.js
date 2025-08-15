@@ -5,8 +5,8 @@ export default class FishingTileEvents {
     this.worldGrid = worldGrid;
     this.player = player;
 
-    this.currentTileKey = null; // tile we occupy
-    this.attemptingTileKey = null; // tile we're trying to occupy
+    this.currentTileKey = null;
+    this.attemptingTileKey = null;
 
     this.socket.on("fishingHoleStates", (allFishingHoles) => {
       for (const key in allFishingHoles) {
@@ -23,8 +23,10 @@ export default class FishingTileEvents {
 
     this.socket.on("occupySuccess", ({ x, y }) => {
       const key = `${x},${y}`;
+      if (this.attemptingTileKey !== key) return;
+
       this.currentTileKey = key;
-      this.attemptingTileKey = null; // clear in-progress attempt
+      this.attemptingTileKey = null;
 
       const tile = this.worldGrid.getFishingTileAt(x, y);
       if (tile) {
@@ -36,15 +38,8 @@ export default class FishingTileEvents {
 
     this.socket.on("occupyFailed", ({ x, y }) => {
       const key = `${x},${y}`;
-      console.log("Fishing hole is occupied!");
-
-      if (this.player.interactText) {
-        this.player.interactText.setText("Hole is Occupied");
-        this.player.interactText.setVisible(true);
-        this.player.interactText.x = this.player.sprite.x;
-        this.player.interactText.y =
-          this.player.sprite.y + this.player.NameTagOffset;
-      }
+      const tile = this.worldGrid.getFishingTileAt(x, y);
+      if (tile) tile.isOccupied = false;
 
       if (this.attemptingTileKey === key) this.attemptingTileKey = null;
     });
@@ -54,11 +49,13 @@ export default class FishingTileEvents {
     const { x, y } = this.worldGrid.WorldCoordinatesToGrid(worldX, worldY);
     const key = `${x},${y}`;
 
-    // Only attempt if not already occupying or trying this tile
     if (this.currentTileKey === key || this.attemptingTileKey === key) return;
 
-    console.log("Attempting to occupy fishing hole at grid:", x, y);
     this.attemptingTileKey = key;
+
+    const tile = this.worldGrid.getFishingTileAt(x, y);
+    if (tile) tile.isOccupied = true; // optimistic visual
+
     this.socket.emit("tryOccupyFishingHole", { x, y });
   }
 

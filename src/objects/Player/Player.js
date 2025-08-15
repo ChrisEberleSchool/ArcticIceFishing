@@ -36,6 +36,7 @@ export default class Player {
       scene.worldGrid,
       this
     );
+    this.lastFishingTileKey = null;
 
     this.socket.emit("requestFishingHoleStates");
 
@@ -66,19 +67,6 @@ export default class Player {
         UIScene.instance.gameBarUI.showExitButton();
       }
     });
-  }
-
-  createNameText(scene) {
-    this.nameText = scene.add
-      .text(x, y - 24, username.toUpperCase(), {
-        fontSize: "10px",
-        color: "#00ffff", // neon cyan-ish
-        fontFamily: "'Orbitron', monospace", // sci-fi style font
-        stroke: "#003344",
-        strokeThickness: 2,
-        letterSpacing: 1.5,
-      })
-      .setOrigin(0.5);
   }
 
   static preload(scene) {
@@ -226,8 +214,9 @@ export default class Player {
     });
   }
 
-  setPosition(x, y) {
-    this.sprite.setPosition(x, y);
+  setPosition(sprite, x, y) {
+    sprite.x = x;
+    sprite.y = y;
   }
 
   moveTo(x, y) {
@@ -239,38 +228,39 @@ export default class Player {
   }
 
   update() {
-    // initial setting of position
+    // Update name text
     this.nameText.x = this.sprite.x;
     this.nameText.y = this.sprite.y - this.NameTagOffset;
 
-    // Determine current tile
+    // Determine current grid tile
     const { x: gridX, y: gridY } = this.scene.worldGrid.WorldCoordinatesToGrid(
-      this.x,
-      this.y
+      this.sprite.x,
+      this.sprite.y
     );
-
     const fishingTile = this.scene.worldGrid.getFishingTileAt(gridX, gridY);
     const currentTileKey = fishingTile ? `${gridX},${gridY}` : null;
 
-    // --- Only try to occupy when stepping on a new tile ---
-    if (fishingTile && !this.fishing) {
-      if (currentTileKey !== this.lastFishingTileKey) {
-        this.fishingTileEvents.tryOccupyFishingTile(this.x, this.y);
-        this.lastFishingTileKey = currentTileKey;
-      }
-    } else {
+    // --- Try to occupy new tile if stepping on one and not fishing ---
+    if (
+      fishingTile &&
+      !this.fishing &&
+      currentTileKey !== this.lastFishingTileKey
+    ) {
+      this.fishingTileEvents.tryOccupyFishingTile(this.sprite.x, this.sprite.y);
+      this.lastFishingTileKey = currentTileKey;
+    } else if (!fishingTile) {
       this.lastFishingTileKey = null;
     }
 
-    // if already fishing return
+    // Stop movement while fishing
     if (this.fishing) {
-      // Already fishing, do nothing
       this.stopMoving();
       this.isMoving = false;
       this.updateAnimation();
       return;
     }
 
+    // --- Normal movement logic ---
     if (!this.target) {
       this.sprite.setVelocity(0, 0);
       this.isMoving = false;
@@ -287,9 +277,7 @@ export default class Player {
     );
 
     if (dist < this.distToTarget) {
-      this.sprite.setVelocity(0, 0);
-      this.target = null;
-      this.isMoving = false;
+      this.stopMoving();
     } else {
       const angle = Phaser.Math.Angle.Between(
         this.sprite.x,
@@ -297,9 +285,10 @@ export default class Player {
         this.target.x,
         this.target.y
       );
-      const vx = Math.cos(angle) * this.speed;
-      const vy = Math.sin(angle) * this.speed;
-      this.sprite.setVelocity(vx, vy);
+      this.sprite.setVelocity(
+        Math.cos(angle) * this.speed,
+        Math.sin(angle) * this.speed
+      );
       this.isMoving = true;
     }
 
@@ -315,10 +304,13 @@ export default class Player {
   startFishing(fishingTile) {
     if (!fishingTile) return;
 
-    // Stop any existing fishing session to avoid doubling timers
-    if (this.fishingSession) {
-      this.fishingSession.stop();
-      this.fishingSession = null;
+    if (!this.fishingSession) {
+      // first time ever: create session
+      this.fishingSession = new FishingSession(this.scene, this, fishingTile);
+    } else {
+      // reuse existing session: stop timers and reset tile
+      this.fishingSession.stopTimersOnly();
+      this.fishingSession.fishingTile = fishingTile;
     }
 
     const xOffset = -18;
@@ -328,21 +320,20 @@ export default class Player {
       fishingTile.GridPos.x,
       fishingTile.GridPos.y
     );
-
-    this.sprite.x = x + xOffset;
-    this.sprite.y = y + yOffset;
-
-    this.nameText.x = this.sprite.x;
-    this.nameText.y = this.sprite.y - this.NameTagOffset;
+    this.setPosition(this.sprite, x + xOffset, y + yOffset);
+    this.setPosition(
+      this.nameText,
+      this.sprite.x,
+      this.sprite.y - this.NameTagOffset
+    );
 
     this.stopMoving();
 
-    this.facing = "right";
     this.fishing = true;
     this.currentFishingTile = fishingTile;
+    this.facing = "right";
 
-    // Create and start a new FishingSession
-    this.fishingSession = new FishingSession(this.scene, this, fishingTile);
+    this.fishingSession.start();
 
     this.scene.events.emit("playerStartedFishing");
   }
@@ -350,12 +341,12 @@ export default class Player {
   stopFishing() {
     if (!this.fishing) return;
 
-    // Clear fishing session and its timers to prevent doubling
+    // Stop timers but keep the session instance
     if (this.fishingSession) {
-      this.fishingSession.stop();
-      this.fishingSession = null;
+      this.fishingSession.stopTimersOnly(); // do NOT set to null
     }
 
+    // Release Tile
     if (this.currentFishingTile) {
       this.fishingTileEvents.releaseFishingTile();
       this.currentFishingTile = null;

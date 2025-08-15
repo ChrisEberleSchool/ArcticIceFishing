@@ -65,7 +65,11 @@ export default class GameScene extends Phaser.Scene {
         (p) => p.username === username
       );
       if (playerData && this.localPlayer) {
-        this.localPlayer.setPosition(playerData.x, playerData.y);
+        this.localPlayer.setPosition(
+          this.localPlayer.sprite,
+          playerData.x,
+          playerData.y
+        );
         this.localPlayer.coins = playerData.coins;
         this.localPlayer.fishCaught = playerData.fishCaught;
 

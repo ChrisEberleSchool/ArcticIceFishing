@@ -10,11 +10,11 @@ export default class CoinUI {
     const coinIcon = scene.add
       .image(0, 0, "coin")
       .setOrigin(0.5, 0.5)
-      .setScale(0.25);
+      .setScale(0.2);
 
     this.coinText = scene.add
-      .text(100, 0, "0", {
-        fontSize: "80px",
+      .text(90, 0, "0", {
+        fontSize: "65px",
         fontFamily: "Arial",
         color: "#ffffff",
         stroke: "#000000",
@@ -27,10 +27,10 @@ export default class CoinUI {
   }
 
   static preload(scene) {
-    scene.load.image("coin", "./assets/ui/coin.png");
+    scene.load.image("coin", "./assets/ui/coins.png");
   }
 
   updateCoinText(amount) {
-    this.coinText.setText(amount.toString());
+    this.coinText.setText(amount.toLocaleString());
   }
 }
