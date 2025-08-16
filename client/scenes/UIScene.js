@@ -1,6 +1,4 @@
 import Phaser from "phaser";
-import Player from "../objects/Player/local/Player.js";
-import RemotePlayer from "../objects/Player/Remote/RemotePlayer.js";
 import sizes from "../config/gameConfig.js";
 import CoinUI from "../ui/CoinUI.js";
 import FishUI from "../ui/FishUI.js";

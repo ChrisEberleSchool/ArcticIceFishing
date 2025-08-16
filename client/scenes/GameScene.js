@@ -1,11 +1,9 @@
 import Phaser from "phaser";
 import socket from "../network/socket.js";
 import Player from "../objects/Player/local/Player.js";
-import RemotePlayer from "../objects/Player/Remote/RemotePlayer.js";
 import registerPlayerEvents from "../objects/Player/clientEvents/PlayerEvents.js";
 import WorldGrid from "../objects/Map/WorldGrid.js";
 import InputManager from "../objects/InputManager.js";
-import sizes from "../config/gameConfig.js";
 import Leaderboard from "../objects/Leaderboard/Leaderboard.js";
 
 const TILE_SIZE = 32;
