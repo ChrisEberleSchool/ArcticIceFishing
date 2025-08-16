@@ -3,7 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import socketConfig from "./config/socketConfig.js";
 import helmet from "helmet";
-import path from "path";
+import path, { join } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,7 +13,7 @@ const app = express();
 
 app.enable("trust proxy");
 
-// ✅ Force HTTPS redirect (only in production)
+// Force HTTPS redirect (only in production)
 app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production" && !req.secure) {
     return res.redirect(`https://${req.headers.host}${req.url}`);
@@ -21,7 +21,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ Apply Helmet with custom HSTS
+// Apply Helmet with custom HSTS
 app.use(
   helmet({
     hsts: {
@@ -32,13 +32,13 @@ app.use(
   })
 );
 
-// ✅ Serve static frontend files (dist folder from Vite build)
-const distPath = path.join(__dirname, "../dist");
+// Serve static frontend files (dist folder from Vite build)
+const distPath = join(__dirname, "../dist");
 app.use(express.static(distPath));
 
-// ✅ Handle direct page refresh (for routes like /about.html, /contact.html)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"));
+// Catch-all fallback for SPA routes
+app.get("/*", (req, res) => {
+  res.sendFile(join(distPath, "index.html"));
 });
 
 const server = http.createServer(app);
