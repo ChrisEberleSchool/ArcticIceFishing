@@ -62,7 +62,7 @@ header nav a:hover {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  background: url("/assets/bg.png") no-repeat center center;
+  background: url("../public/assets/bg.png") no-repeat center center;
   background-size: 30% auto;
   text-align: center;
   padding: 20px 0;

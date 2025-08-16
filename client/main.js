@@ -1,3 +1,8 @@
+import "./style.css";
+import "./aboutStyle.css";
+import "./contactStyle.css";
+import "./whatsnewStyle.css";
+
 import Phaser from "phaser";
 import socket from "./network/socket.js";
 import sizes from "./config/gameConfig.js";

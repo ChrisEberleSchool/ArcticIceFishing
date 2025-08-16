@@ -10,20 +10,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ----------------------
-// Init express and security
+// Init express and create security paramaters
 // ----------------------
 const app = express();
+
 app.enable("trust proxy");
 
-// Force HTTPS redirect (production only)
+// Force HTTPS redirect (only in production)
 app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production" && !req.secure) {
     return res.redirect(`https://${req.headers.host}${req.url}`);
   }
   next();
 });
-
-// Apply Helmet with HSTS
+// Apply Helmet with custom HSTS
 app.use(
   helmet({
     hsts: {
@@ -35,29 +35,38 @@ app.use(
 );
 
 // ----------------------
-// Serve static files
+// Using Express below to serve static web pages with clean urls
 // ----------------------
+
+// Serve static frontend files (dist folder from Vite build)
 const distPath = join(__dirname, "../dist");
 app.use(express.static(distPath));
 
-// ----------------------
-// Multi-page routes
-// ----------------------
-app.get("/", (req, res) => res.sendFile(join(distPath, "index.html")));
-app.get("/about", (req, res) => res.sendFile(join(distPath, "about.html")));
-app.get("/contact", (req, res) => res.sendFile(join(distPath, "contact.html")));
-app.get("/whatsnew", (req, res) =>
-  res.sendFile(join(distPath, "whatsnew.html"))
-);
+app.get("/", (req, res) => {
+  res.sendFile(join(distPath, "index.html"));
+});
+app.get("/about", (req, res) => {
+  res.sendFile(join(distPath, "about.html"));
+});
+app.get("/contact", (req, res) => {
+  res.sendFile(join(distPath, "contact.html"));
+});
+app.get("/whatsnew", (req, res) => {
+  res.sendFile(join(distPath, "whatsnew.html"));
+});
+
+/*
+ * SPA fallback
+ * so when a user types in a url that doesnt exist it reroutes user back to the homepage index.html
+ */
+app.get(/.*/, (req, res) => {
+  res.sendFile(join(distPath, "index.html"));
+});
 
 // ----------------------
-// SPA fallback for unknown routes
+// Server creation
 // ----------------------
-app.get("*", (req, res) => res.sendFile(join(distPath, "index.html")));
 
-// ----------------------
-// Server & Socket.IO
-// ----------------------
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 socketConfig(io);
