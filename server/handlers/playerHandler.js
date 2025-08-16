@@ -109,7 +109,7 @@ export async function onDisconnect(socket, io) {
   console.log(`Player disconnected: ${player.username}`);
 }
 
-// Run cleanup every 30 seconds
+// Run cleanup
 let cleanupStarted = false;
 export function startPeriodicCleanup(io) {
   if (cleanupStarted) return;
@@ -117,9 +117,7 @@ export function startPeriodicCleanup(io) {
 
   setInterval(async () => {
     try {
-      console.log("Running periodic cleanup of stale users/players...");
-
-      const activeSocketIds = new Set([...io.sockets.sockets.keys()]); // all currently connected socket ids
+      const activeSocketIds = new Set([...io.sockets.sockets.keys()]);
 
       // Check players for stale sockets
       for (const socketId of Object.keys(players)) {
@@ -167,5 +165,5 @@ export function startPeriodicCleanup(io) {
     } catch (err) {
       console.error("Failed to emit players update:", err);
     }
-  }, 30000);
+  }, 10000);
 }
