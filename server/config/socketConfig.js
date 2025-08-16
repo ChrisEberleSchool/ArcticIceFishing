@@ -24,12 +24,8 @@ export default function socketConfig(io) {
     chatHandler(socket, io);
     leaderboardHandler(socket, io);
 
-    // TODO :: Remove this
-    // Send initial fishing holes state to the newly connected player
-    for (const key in fishingHoles) {
-      const [x, y] = key.split(",").map(Number);
-      socket.emit("fishingHoleUpdate", { x, y, occupiedBy: fishingHoles[key] });
-    }
+    /// Send initial fishing holes state in one payload
+    socket.emit("fishingHoleStates", fishingHoles);
 
     socket.on("disconnect", () => {
       fishingOnDisconnect(socket, io);

@@ -1,5 +1,8 @@
 import "./style.css";
-import "./aboutStyles.css";
+import "./aboutStyle.css";
+import "./contactStyle.css";
+import "./whatsnewStyle.css";
+
 import Phaser from "phaser";
 import socket from "./network/socket.js";
 import sizes from "./config/gameConfig.js";
@@ -35,38 +38,40 @@ window.addEventListener("unhandledrejection", function (event) {
 // Elements
 // ----------------------
 const landingPage = document.getElementById("landingPage");
-//const loginScreen = document.getElementById("loginScreen");
 const playBtn = document.getElementById("playNowBtn");
 const gameCanvasParent = document.getElementById("gameCanvasParent");
 
 // ----------------------
 // Play Now button
 // ----------------------
-playBtn.addEventListener("click", () => {
-  landingPage.style.display = "none";
-  gameCanvasParent.style.display = "block";
+if (landingPage && playBtn && gameCanvasParent) {
+  playBtn.addEventListener("click", () => {
+    landingPage.style.display = "none";
+    gameCanvasParent.style.display = "block";
 
-  const config = {
-    type: Phaser.WEBGL,
-    width: sizes.width,
-    height: sizes.height,
-    parent: gameCanvasParent,
-    dom: { createContainer: true },
-    pixelArt: true,
-    roundPixels: true,
-    physics: { default: "arcade", arcade: { gravity: { y: 0 }, debug: false } },
-    scene: [BootScene, AuthScene, LoadingScene, GameScene, UIScene],
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
-  };
+    const config = {
+      type: Phaser.WEBGL,
+      width: sizes.width,
+      height: sizes.height,
+      parent: gameCanvasParent,
+      dom: { createContainer: true },
+      pixelArt: true,
+      roundPixels: true,
+      physics: {
+        default: "arcade",
+        arcade: { gravity: { y: 0 }, debug: false },
+      },
+      scene: [BootScene, AuthScene, LoadingScene, GameScene, UIScene],
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
+    };
 
-  const game = new Phaser.Game(config); // Phaser starts now
+    const game = new Phaser.Game(config); // Phaser starts now
 
-  // Manually trigger Phaser to re-fit when window resizes
-  window.addEventListener("resize", () => {
-    // Use Phaser.Scale.FIT
-    game.scale.resize(sizes.width, sizes.height);
+    window.addEventListener("resize", () => {
+      game.scale.FIT;
+    });
   });
-});
+}

@@ -9,6 +9,9 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ----------------------
+// Init express and create security paramaters
+// ----------------------
 const app = express();
 
 app.enable("trust proxy");
@@ -20,7 +23,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
 // Apply Helmet with custom HSTS
 app.use(
   helmet({
@@ -32,17 +34,40 @@ app.use(
   })
 );
 
+// ----------------------
+// Using Express below to serve static web pages with clean urls
+// ----------------------
+
 // Serve static frontend files (dist folder from Vite build)
 const distPath = join(__dirname, "../dist");
 app.use(express.static(distPath));
 
-// Catch-all fallback for SPA routes
+app.get("/", (req, res) => {
+  res.sendFile(join(distPath, "index.html"));
+});
+app.get("/about", (req, res) => {
+  res.sendFile(join(distPath, "about.html"));
+});
+app.get("/contact", (req, res) => {
+  res.sendFile(join(distPath, "contact.html"));
+});
+app.get("/whatsnew", (req, res) => {
+  res.sendFile(join(distPath, "whatsnew.html"));
+});
+
+/*
+ * SPA fallback
+ * so when a user types in a url that doesnt exist it reroutes user back to the homepage index.html
+ */
 app.get(/.*/, (req, res) => {
   res.sendFile(join(distPath, "index.html"));
 });
 
-const server = http.createServer(app);
+// ----------------------
+// Server creation
+// ----------------------
 
+const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 socketConfig(io);
 
