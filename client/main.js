@@ -13,6 +13,16 @@ import LoadingScene from "./scenes/LoadingScene.js";
 import GameScene from "./scenes/GameScene.js";
 import UIScene from "./scenes/UIScene.js";
 
+// Set the website icon
+let link = document.querySelector("link[rel~='icon']");
+if (!link) {
+  link = document.createElement("link");
+  link.rel = "icon";
+  document.head.appendChild(link);
+}
+
+link.href = "/assets/bg.png";
+
 // Catch global JS errors
 window.onerror = function (message, source, lineno, colno, error) {
   socket.emit("clientError", {
