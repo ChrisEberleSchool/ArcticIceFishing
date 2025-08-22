@@ -10,7 +10,8 @@ export default class CoinUI {
     const coinIcon = scene.add
       .image(0, 0, "coin")
       .setOrigin(0.5, 0.5)
-      .setScale(0.2);
+      .setScale(0.2)
+      .setDepth(5);
 
     this.coinText = scene.add
       .text(90, 0, "0", {
@@ -21,7 +22,8 @@ export default class CoinUI {
         strokeThickness: 14,
         letterSpacing: 12,
       })
-      .setOrigin(0, 0.5);
+      .setOrigin(0, 0.5)
+      .setDepth(5);
 
     this.container.add([coinIcon, this.coinText]);
   }
