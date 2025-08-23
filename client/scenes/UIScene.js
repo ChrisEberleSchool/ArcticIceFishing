@@ -25,18 +25,7 @@ export default class UIScene extends Phaser.Scene {
     this.inventoryUI = null;
   }
 
-  preload() {
-    GameBarUI.preload(this);
-    CoinUI.preload(this);
-    FishUI.preload(this);
-    FishFactory.preloadAll(this);
-    FishMiniGameUI.preload(this);
-
-    ItemFactory.preloadAll(this);
-
-    // InventoryUI.preload(this);
-    ShopUI.preload(this);
-  }
+  preload() {}
 
   create(data) {
     this.username = data?.username;

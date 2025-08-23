@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import sizes from "../../config/gameConfig.js";
 
 export default class ShopSlot {
-  constructor(scene, x, y, item = null) {
+  constructor(scene, x, y, item = null, scaleFactor = 1) {
     this.scene = scene;
     this.item = item;
 

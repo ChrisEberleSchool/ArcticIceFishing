@@ -1,4 +1,5 @@
 import FishingTile from "./FishingTile";
+import Interactable from "./Interactable";
 
 export default class WorldGrid {
   constructor(scene, width, height, TILE_SIZE) {
@@ -26,11 +27,41 @@ export default class WorldGrid {
       new FishingTile(20, 14),
     ];
 
+    this.interactables = [new Interactable(2, 5, "store")];
+
     this.debugGraphics = this.scene.add.graphics();
     this.debugGraphics.setDepth(10010);
     this.debugGraphics.lineStyle(2, 0xff0000, 1);
 
-    //this.DebugDrawFishingHoles();
+    this.DebugDrawInteractables();
+  }
+
+  DebugDrawInteractables() {
+    this.debugGraphics.clear();
+    this.debugGraphics.lineStyle(2, 0x00ff00, 1);
+
+    this.interactables.forEach((obj) => {
+      this.debugGraphics.strokeRect(
+        obj.GridPos.x * this.TILE_SIZE,
+        obj.GridPos.y * this.TILE_SIZE,
+        this.TILE_SIZE,
+        this.TILE_SIZE
+      );
+    });
+  }
+  isOnInteractable(worldX, worldY) {
+    const { x, y } = this.WorldCoordinatesToGrid(worldX, worldY);
+    return this.interactables.some(
+      (obj) => obj.GridPos.x === x && obj.GridPos.y === y
+    );
+  }
+  getInteractableAtGrid(gridX, gridY, type = null) {
+    return this.interactables.find(
+      (obj) =>
+        obj.GridPos.x === gridX &&
+        obj.GridPos.y === gridY &&
+        (type ? obj.type === type : true)
+    );
   }
 
   DebugDrawFishingHoles() {

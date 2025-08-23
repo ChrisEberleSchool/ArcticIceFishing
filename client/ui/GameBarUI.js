@@ -265,4 +265,13 @@ export default class GameBarUI {
     if (!this.exitButton) return;
     this.exitButton.setVisible(false);
   }
+
+  hideChat() {
+    if (this.chatField) this.chatField.setVisible(false);
+    if (this.chatLog) this.chatLog.setVisible(false);
+  }
+  showChat() {
+    if (this.chatField) this.chatField.setVisible(true);
+    if (this.chatLog) this.chatLog.setVisible(true);
+  }
 }

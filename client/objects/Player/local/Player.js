@@ -6,6 +6,7 @@ import PlayerNameTag from "./PlayerNameTag.js";
 import PlayerSprite from "./PlayerSprite.js";
 import PlayerFishingController from "./PlayerFishingController.js";
 import PlayerData from "./PlayerData.js";
+import GameScene from "../../../scenes/GameScene.js";
 
 export default class Player {
   constructor(scene, x, y, username, socket, coins, fishCaught) {
@@ -33,6 +34,7 @@ export default class Player {
         UIScene.instance.gameBarUI.showExitButton();
       }
     });
+    UIScene.instance.coinUI.updateCoinText(this.playerData.coins);
   }
 
   static preload(scene) {
@@ -57,6 +59,24 @@ export default class Player {
 
     const fishingState = this.fishingController.getFishingState();
     const isFishing = !!fishingState || this.playerState.fishing;
+
+    // interactable
+
+    if (!this.playerState.inShop) {
+      const playerGrid = GameScene.instance.worldGrid.WorldCoordinatesToGrid(
+        this.playerSprite.sprite.x,
+        this.playerSprite.sprite.y
+      );
+      const store = GameScene.instance.worldGrid.getInteractableAtGrid(
+        playerGrid.x,
+        playerGrid.y,
+        "store"
+      );
+      // colliding with store
+      if (store) {
+        UIScene.instance.shopUI.show();
+      }
+    }
 
     // --- Stop movement if fishing ---
     if (isFishing) {

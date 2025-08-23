@@ -1,4 +1,12 @@
 import Phaser from "phaser";
+import GameBarUI from "../ui/GameBarUI";
+import CoinUI from "../ui/CoinUI";
+import FishUI from "../ui/FishUI";
+import FishFactory from "../objects/fishing/FishFactory";
+import FishMiniGameUI from "../ui/FishMiniGameUI";
+import ItemFactory from "../ui/shopUI/ItemFactory";
+import ShopUI from "../ui/shopUI/ShopUI";
+import Player from "../objects/Player/local/Player";
 
 export default class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -22,6 +30,17 @@ export default class LoadingScene extends Phaser.Scene {
       frameWidth: 40,
       frameHeight: 18,
     });
+
+    // PLAYER PRELOAD
+    Player.preload(this);
+    // UI PRELOADS
+    GameBarUI.preload(this);
+    CoinUI.preload(this);
+    FishUI.preload(this);
+    FishFactory.preloadAll(this);
+    FishMiniGameUI.preload(this);
+    ItemFactory.preloadAll(this);
+    ShopUI.preload(this);
 
     // Once loading sprite is ready, show animation & progress bar
     this.load.once("complete", () => {
@@ -58,8 +77,6 @@ export default class LoadingScene extends Phaser.Scene {
   loadGameAssets(progressBar, width, height) {
     // Game assets
     this.load.image("tiles", "./assets/mapAssets/spritesheet.png");
-    this.load.image("spenn", "./assets/Spen.png");
-    this.load.image("dena", "./assets/Dena.png");
     this.load.tilemapTiledJSON("map1", "./assets/mapAssets/map1.json");
 
     // Progress bar

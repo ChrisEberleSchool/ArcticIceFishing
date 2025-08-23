@@ -20,11 +20,7 @@ export default class GameScene extends Phaser.Scene {
     this.leaderboard = null;
   }
 
-  preload() {
-    Player.preload(this);
-
-    console.log("GAME SCENE STARTED");
-  }
+  preload() {}
 
   create(data) {
     GameScene.instance = this;
@@ -84,20 +80,6 @@ export default class GameScene extends Phaser.Scene {
     registerPlayerEvents(this, this.socket); // should internally use RemotePlayer
 
     this.socket.emit("initPlayer", { username });
-
-    const x = -20;
-    const y = 150;
-    const originX = 0.5; // center horizontally
-    const originY = 0.5; // center vertically
-    const width = 40; // desired width in pixels
-    const height = 150; // desired height in pixels
-
-    const myImageSprite = this.add.sprite(x, y, "spenn");
-    myImageSprite.setOrigin(originX, originY);
-    myImageSprite.setDisplaySize(width, height);
-    const myImageSprite1 = this.add.sprite(x, y + 150, "dena");
-    myImageSprite1.setOrigin(originX, originY);
-    myImageSprite1.setDisplaySize(width, height);
 
     // leaderboard
     this.leaderboard = new Leaderboard(this, 280, 10);

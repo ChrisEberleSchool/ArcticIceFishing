@@ -14,9 +14,54 @@ export default class ShopUI {
 
     // Items per tab
     this.itemsByTab = {
-      rodReel: [new AdvancedRod(), null, new AdvancedRod(), null],
-      lineTackle: [null, null, null],
-      lureBait: [new AdvancedRod()],
+      rodReel: [
+        new AdvancedRod(),
+        new AdvancedRod(),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      lineTackle: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      lureBait: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
     };
 
     this.build();
@@ -138,6 +183,9 @@ export default class ShopUI {
     const mask = maskShape.createGeometryMask();
     this.itemsContainer.setMask(mask);
     maskShape.setVisible(false);
+
+    // hide in creation
+    this.mainContainer.setVisible(false);
   }
 
   // Layout items in grid
@@ -260,11 +308,19 @@ export default class ShopUI {
   show() {
     this.mainContainer.setVisible(true);
     GameScene.instance.localPlayer.playerState.inShop = true;
+
+    // hide the chatbox
+    this.scene.gameBarUI.hideChat();
   }
 
   // Hide the shop UI
   hide() {
+    const player = GameScene.instance.localPlayer;
     this.mainContainer.setVisible(false);
-    GameScene.instance.localPlayer.playerState.inShop = false;
+    player.playerState.inShop = false;
+    player.playerSprite.sprite.y += 50;
+
+    // show the chatbox
+    this.scene.gameBarUI.showChat();
   }
 }
