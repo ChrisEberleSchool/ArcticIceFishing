@@ -308,7 +308,7 @@ export default class ShopUI {
   show() {
     this.mainContainer.setVisible(true);
     GameScene.instance.localPlayer.playerState.inShop = true;
-
+    GameScene.instance.localPlayer.stopMoving();
     // hide the chatbox
     this.scene.gameBarUI.hideChat();
   }

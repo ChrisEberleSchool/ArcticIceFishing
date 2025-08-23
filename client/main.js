@@ -85,3 +85,50 @@ if (landingPage && playBtn && gameCanvasParent) {
     });
   });
 }
+
+// ----------------------
+// Contact Form Logic
+// ----------------------
+const contactForm = document.getElementById("contactForm");
+if (contactForm) {
+  const nameInput = document.getElementById("name");
+  const msgInput = document.getElementById("message");
+  const sendBtn = document.getElementById("sendBtn");
+  const feedback = document.getElementById("feedback");
+
+  // init EmailJS
+  (function () {
+    emailjs.init("jQX2Vwa52uH3luip1"); // 🔑 replace with your EmailJS key
+  })();
+
+  // Enable/disable button
+  function validateForm() {
+    const valid =
+      nameInput.value.trim().length > 0 && msgInput.value.trim().length > 3;
+    sendBtn.disabled = !valid;
+  }
+
+  nameInput.addEventListener("input", validateForm);
+  msgInput.addEventListener("input", validateForm);
+
+  contactForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    emailjs
+      .send("service_8crcafy", "template_pwcq6hs", {
+        from_name: nameInput.value,
+        message: msgInput.value,
+        subject: "[FISHHUB CONTACT]",
+      })
+      .then(() => {
+        feedback.textContent = "✅ Message sent successfully!";
+        feedback.className = "success";
+        contactForm.reset();
+        sendBtn.disabled = true;
+      })
+      .catch((err) => {
+        feedback.textContent = "❌ Failed to send: " + JSON.stringify(err);
+        feedback.className = "error";
+      });
+  });
+}
