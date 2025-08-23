@@ -18,6 +18,10 @@ export default class InputManager {
   }
 
   onPointerDown(pointer) {
+    if (this.player.playerState.inShop) {
+      return;
+    }
+
     if (this.player.fishingController.fishingSession?.fightActive) {
       this.player.fishingController.fishingSession.handlePointerDown(pointer);
     } else {

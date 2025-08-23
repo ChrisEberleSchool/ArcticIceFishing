@@ -10,6 +10,7 @@ const TILE_SIZE = 32;
 const PLAYER_SPAWN_POINT = { x: 250, y: 250 };
 
 export default class GameScene extends Phaser.Scene {
+  static instance = null;
   constructor() {
     super("scene-game");
     this.players = {}; // remote players
@@ -26,6 +27,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create(data) {
+    GameScene.instance = this;
     const username = data?.username;
     if (!username) {
       console.error("Missing username, cannot initialize player.");

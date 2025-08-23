@@ -7,5 +7,6 @@ export default class PlayerState {
     this.isMoving = false;
     this.distToTarget = 3;
     this.fishing = false;
+    this.inShop = true;
   }
 }

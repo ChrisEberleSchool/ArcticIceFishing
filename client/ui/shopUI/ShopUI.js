@@ -1,30 +1,22 @@
-import sizes from "../config/gameConfig.js";
+import sizes from "../../config/gameConfig.js";
+import AdvancedRod from "./items/AdvancedRod.js";
+import ShopSlot from "./ShopSlot.js";
+import GameScene from "../../scenes/GameScene.js";
+
 import Phaser from "phaser";
 
 export default class ShopUI {
   constructor(scene) {
     this.scene = scene;
     this.BG_HEIGHT_PADDING = -80;
+    this.SLOT_SCALE_FACTOR = 1.69;
     this.activeTab = "rodReel";
 
     // Items per tab
     this.itemsByTab = {
-      rodReel: [
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-        "item",
-      ],
-      lineTackle: ["item", "item", "item", "item"],
-      lureBait: ["item", "item", "item", "item", "item"],
+      rodReel: [new AdvancedRod(), null, new AdvancedRod(), null],
+      lineTackle: [null, null, null],
+      lureBait: [new AdvancedRod()],
     };
 
     this.build();
@@ -81,6 +73,26 @@ export default class ShopUI {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true })
         .on("pointerdown", () => this.switchTab(name));
+
+      // --- Hover scale effect ---
+      btn.on("pointerover", () => {
+        this.scene.tweens.add({
+          targets: btn,
+          scale: 1.2,
+          duration: 200,
+          ease: "Power2",
+        });
+      });
+
+      btn.on("pointerout", () => {
+        this.scene.tweens.add({
+          targets: btn,
+          scale: 1,
+          duration: 200,
+          ease: "Power2",
+        });
+      });
+
       btn.setDepth(10);
       this.tabButtons.push(btn);
       this.mainContainer.add(btn);
@@ -130,42 +142,31 @@ export default class ShopUI {
 
   // Layout items in grid
   layoutItems(items) {
-    const scaleFactor = 1;
-    // default scale 0.5
     this.itemsContainer.removeAll(true);
 
-    const { width: scrollWidth, height: scrollHeight } = this.scrollArea;
-    const padding = 10;
+    const { width: scrollWidth } = this.scrollArea;
+    const padding = 20;
     let maxRow = 0;
 
-    // Get size from first item for grid calculation
-    const firstTexture = this.scene.textures.get(items[0]);
-    const baseWidth = firstTexture.getSourceImage().width;
-    const baseHeight = firstTexture.getSourceImage().height;
+    // Use slot background size
+    const slotTexture = this.scene.textures.get("item"); // slot background
+    const slotWidth = slotTexture.getSourceImage().width;
+    const slotHeight = slotTexture.getSourceImage().height;
 
-    const itemWidth = baseWidth * scaleFactor;
-    const itemHeight = baseHeight * scaleFactor;
+    const maxCols = Math.floor(scrollWidth / (slotWidth + padding));
 
-    const maxCols = Math.floor(scrollWidth / (itemWidth + padding));
-
-    items.forEach((key, index) => {
+    items.forEach((itemObj, index) => {
       const col = index % maxCols;
       const row = Math.floor(index / maxCols);
-      const x = col * (itemWidth + padding);
-      const y = row * (itemHeight + padding);
-
-      const item = this.scene.add
-        .image(x, y, key)
-        .setOrigin(0, 0)
-        .setScale(scaleFactor); // scale image
-      item.setInteractive({ useHandCursor: true });
-      this.itemsContainer.add(item);
+      const x = col * (slotWidth + padding) + slotWidth / 2;
+      const y = row * (slotHeight + padding) + slotHeight / 2;
+      const slot = new ShopSlot(this.scene, x, y, itemObj);
+      this.itemsContainer.add(slot.getGameObject());
 
       maxRow = row;
     });
 
-    this.itemsContainer.realHeight = (maxRow + 1) * (itemHeight + padding);
-
+    this.itemsContainer.realHeight = (maxRow + 1) * (slotHeight + padding);
     this.createScrollbar();
   }
   // Create draggable scrollbar
@@ -258,10 +259,12 @@ export default class ShopUI {
   // Show the shop UI
   show() {
     this.mainContainer.setVisible(true);
+    GameScene.instance.localPlayer.playerState.inShop = true;
   }
 
   // Hide the shop UI
   hide() {
     this.mainContainer.setVisible(false);
+    GameScene.instance.localPlayer.playerState.inShop = false;
   }
 }

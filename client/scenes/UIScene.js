@@ -7,7 +7,8 @@ import FishFactory from "../objects/fishing/FishFactory.js";
 import GameBarUI from "../ui/GameBarUI.js";
 import socket from "../network/socket.js";
 import InventoryUI from "../ui/InventoryUI.js";
-import ShopUI from "../ui/ShopUI.js";
+import ShopUI from "../ui/shopUI/ShopUI.js";
+import ItemFactory from "../ui/shopUI/ItemFactory.js";
 
 export default class UIScene extends Phaser.Scene {
   static instance = null;
@@ -30,6 +31,9 @@ export default class UIScene extends Phaser.Scene {
     FishUI.preload(this);
     FishFactory.preloadAll(this);
     FishMiniGameUI.preload(this);
+
+    ItemFactory.preloadAll(this);
+
     // InventoryUI.preload(this);
     ShopUI.preload(this);
   }
@@ -41,19 +45,17 @@ export default class UIScene extends Phaser.Scene {
     // Fish UI
     FishUI.createAnimations(this);
     this.fishUI = new FishUI(this);
-
     this.fishMiniGameUI = new FishMiniGameUI(this);
+
+    // Shop & Inventory UI
+    this.shopUI = new ShopUI(this);
 
     // Player Stats UI
     const coinMargin = 100;
     this.coinUI = new CoinUI(this, coinMargin, coinMargin);
-
     // GameBar
     this.gameBarUI = new GameBarUI(this, sizes.width / 2, sizes.height - 50);
     this.gameBarUI.setUsername(this.username);
-    // Inventory
-    //this.inventoryUI = new InventoryUI(this, 600, 300, 200, 300);
-    this.shopUI = new ShopUI(this);
 
     socket.on("chatMessage", (data) => {
       if (UIScene.instance?.gameBarUI) {
