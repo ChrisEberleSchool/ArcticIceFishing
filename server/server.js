@@ -41,20 +41,6 @@ app.use(
 // Serve static frontend files (dist folder from Vite build)
 const distPath = join(__dirname, "../dist");
 app.use(express.static(distPath));
-
-app.get("/", (req, res) => {
-  res.sendFile(join(distPath, "index.html"));
-});
-app.get("/about", (req, res) => {
-  res.sendFile(join(distPath, "about.html"));
-});
-app.get("/contact", (req, res) => {
-  res.sendFile(join(distPath, "contact.html"));
-});
-app.get("/whatsnew", (req, res) => {
-  res.sendFile(join(distPath, "whatsnew.html"));
-});
-
 /*
  * SPA fallback
  * so when a user types in a url that doesnt exist it reroutes user back to the homepage index.html

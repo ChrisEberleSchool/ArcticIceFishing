@@ -1,0 +1,16 @@
+:root {
+  --red: #c1666b;
+  --black: #3b413c;
+  --yellow: #f2f230;
+  --light: #daf0ee;
+  --blue: #94d1be;
+}
+
+footer {
+  background-color: transparent;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 4px 4px 8px rgb(0, 0, 0);
+}
