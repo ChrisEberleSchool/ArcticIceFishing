@@ -1,11 +1,16 @@
 import { Link } from "react-router-dom";
 import "./Banner.css";
 
-export default function Banner() {
+export default function Banner({
+  title,
+  subtitle,
+  className = "",
+  style = {},
+}) {
   return (
-    <div className="banner">
-      <h1>Welcome to FishHub!</h1>
-      <p>A good days fishen is better than a bad days work</p>
+    <div className={`banner ${className}`} style={style}>
+      <h1 className="banner__title">{title}</h1>
+      {subtitle && <p className="banner__subtitle">{subtitle}</p>}
     </div>
   );
 }

@@ -25,73 +25,40 @@ export default class LoadingScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(0x222222);
 
-    // --- Preload loading sprite only ---
-    this.load.spritesheet("loading", "./assets/ui/loading/loadingScreen.png", {
-      frameWidth: 40,
-      frameHeight: 18,
-    });
+    // --- Create loading animation sprite (reusing loaded assets) ---
+    const loadingSprite = this.add.sprite(
+      width / 2,
+      height / 2 - 80,
+      "loading"
+    );
 
-    // Once loading sprite is ready, show animation & progress bar
-    this.load.once("complete", () => {
-      // --- Loading animation ---
-      const loadingSprite = this.add.sprite(
-        width / 2,
-        height / 2 - 80,
-        "loading"
-      );
-      this.anims.create({
-        key: "loadingAnim",
-        frames: this.anims.generateFrameNumbers("loading", {
-          start: 0,
-          end: 5,
-        }),
-        frameRate: 8,
-        repeat: -1,
-      });
-      loadingSprite.play("loadingAnim");
+    // Play the animation assuming it was created in BootScene
+    loadingSprite.play("loadingAnim");
 
-      // --- Progress bar ---
-      const border = this.add.graphics();
-      border.lineStyle(4, 0xffffff, 1);
-      border.strokeRect(width / 2 - 200, height / 2 - 25, 400, 50);
-      const progressBar = this.add.graphics();
+    // --- Progress bar setup ---
+    const border = this.add.graphics();
+    border.lineStyle(4, 0xffffff, 1);
+    border.strokeRect(width / 2 - 200, height / 2 - 25, 400, 50);
 
-      // Load the rest of the game assets
-      this.loadGameAssets(progressBar, width, height);
-      // PLAYER PRELOAD
-      Player.preload(this);
-      // UI PRELOADS
-      GameBarUI.preload(this);
-      CoinUI.preload(this);
-      FishUI.preload(this);
-      FishFactory.preloadAll(this);
-      FishMiniGameUI.preload(this);
-      ItemFactory.preloadAll(this);
-      ShopUI.preload(this);
-    });
+    this.progressBar = this.add.graphics();
 
-    this.load.start();
-  }
-
-  loadGameAssets(progressBar, width, height) {
-    // Game assets
-    this.load.image("tiles", "./assets/mapAssets/spritesheet.png");
-    this.load.tilemapTiledJSON("map1", "./assets/mapAssets/map1.json");
-
-    // Progress bar
+    // Listen for progress and update progress bar
     this.load.on("progress", (value) => {
-      progressBar.clear();
-      progressBar.fillStyle(0x00ff00, 1);
-      progressBar.fillRect(width / 2 - 196, height / 2 - 21, 392 * value, 42);
+      this.progressBar.clear();
+      this.progressBar.fillStyle(0x00ff00, 1);
+      this.progressBar.fillRect(
+        width / 2 - 196,
+        height / 2 - 21,
+        392 * value,
+        42
+      );
     });
 
-    // When assets loaded, launch scenes
-    this.load.on("complete", () => {
-      // Launch scenes but keep loading scene visible
+    // When loading is complete
+    this.load.once("complete", () => {
       this.scene.launch("scene-ui", { username: this.username });
       this.scene.launch("scene-game", { username: this.username });
 
-      // Listen for 'create' event of each scene
       const uiScene = this.scene.get("scene-ui");
       const gameScene = this.scene.get("scene-game");
 
@@ -106,11 +73,24 @@ export default class LoadingScene extends Phaser.Scene {
       });
     });
 
+    // Add all other assets to load now
+    Player.preload(this);
+    GameBarUI.preload(this);
+    CoinUI.preload(this);
+    FishUI.preload(this);
+    FishFactory.preloadAll(this);
+    FishMiniGameUI.preload(this);
+    ItemFactory.preloadAll(this);
+    ShopUI.preload(this);
+
+    this.load.image("tiles", "./assets/mapAssets/spritesheet.png");
+    this.load.tilemapTiledJSON("map1", "./assets/mapAssets/map1.json");
+
+    // Start loading the game assets (don't load loading sprite again!)
     this.load.start();
   }
 
   checkReady() {
-    // Stop loading scene only when both scenes are fully created
     if (this.uiReady && this.gameReady) {
       this.scene.stop();
     }

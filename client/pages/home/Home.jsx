@@ -9,10 +9,13 @@ export default function Home() {
 
   return (
     <section>
-      <Banner />
+      <Banner
+        title="Welcome to FishHub!"
+        subtitle="A good days fishen is better than a bad days work"
+      />
       <div className="playNow">
         <button
-          class="button-74"
+          className="button-74"
           role="button"
           onClick={() => navigate("/play")}
         >

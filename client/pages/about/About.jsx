@@ -1,7 +1,16 @@
+import { Link } from "react-router-dom";
+import "./About.css";
+import Banner from "../../components/banner/Banner.jsx";
+
 export default function About() {
   return (
-    <main id="aboutPage">
-      <div className="about-content">
+    <main id="about">
+      <Banner
+        title="About FishHub"
+        subtitle="Good things come to those who bait."
+        className="banner--about"
+      />
+      <div className="content">
         <h1>About Fish Hub</h1>
         <p>An online fishing game</p>
 
@@ -19,7 +28,7 @@ export default function About() {
         <h2>Contact & Support</h2>
         <p>
           For questions, feedback, or support, please visit our{" "}
-          <a href="/contact">Contact</a> page.
+          <Link to="/contact">Contact</Link> page.
         </p>
       </div>
     </main>

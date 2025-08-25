@@ -8,21 +8,11 @@ import UIScene from "./scenes/UIScene.js";
 
 // Export function to start Phaser
 export function startGame(parentElementOrId) {
-  const parent =
-    typeof parentElementOrId === "string"
-      ? document.getElementById(parentElementOrId)
-      : parentElementOrId;
-
-  if (!parent) {
-    console.error("startGame: parent element not found", parentElementOrId);
-    return null;
-  }
-
   const config = {
     type: Phaser.WEBGL,
     width: sizes.width,
     height: sizes.height,
-    parent: parent,
+    parent: parentElementOrId,
     dom: { createContainer: true },
     pixelArt: true,
     roundPixels: true,
@@ -31,19 +21,16 @@ export function startGame(parentElementOrId) {
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
+      width: sizes.width,
+      height: sizes.height,
     },
   };
 
   const game = new Phaser.Game(config);
 
-  window.addEventListener("resize", () => {
-    game.scale.FIT;
-  });
-
   return {
     destroy: () => {
       game.destroy(true);
-      window.removeEventListener("resize");
     },
   };
 }

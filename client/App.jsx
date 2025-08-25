@@ -1,11 +1,11 @@
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/home/Home.jsx";
-import Play from "./pages/Play.jsx";
-import About from "./pages/About.jsx";
-import Contact from "./pages/Contact.jsx";
-import WhatsNew from "./pages/WhatsNew.jsx";
+import Play from "./pages/play/Play.jsx";
+import About from "./pages/about/About.jsx";
+import Contact from "./pages/contact/Contact.jsx";
+import WhatsNew from "./pages/whatsnew/WhatsNew.jsx";
 
-import "./styles/index.css";
+import "./index.css";
 
 // UI COMPONENTS
 import Navbar from "./components/navbar/Navbar.jsx";
