@@ -187,13 +187,63 @@ export default class SignupPage {
       return alert("Both fields required");
     }
 
+    // Show animated "Creating Account..." popup
+    this.showCreatingAccountPopup();
+
     try {
-      socket.emit("signup", { username, password });
+      socket.emit("signup", { username, password }, (response) => {
+        // Hide popup after server responds
+        this.hideCreatingAccountPopup();
+
+        if (response.success) {
+          alert("Account created!");
+          this.close();
+          this.scene.showLoginSignupPage();
+        } else {
+          alert("Error: " + response.message);
+        }
+      });
     } catch (err) {
+      this.hideCreatingAccountPopup();
       socket.emit("clientError", { message: err.message, stack: err.stack });
     }
   }
 
+  // Popup methods
+  showCreatingAccountPopup() {
+    if (!this.creatingPopup) {
+      this.creatingPopup = this.scene.add
+        .text(
+          this.gameWidth / 2,
+          this.gameHeight / 2 - 150,
+          "Creating Account...",
+          {
+            font: "60px Arial",
+            fill: "#ffffff",
+          }
+        )
+        .setOrigin(0.5)
+        .setAlpha(0);
+
+      // Simple fade-in + pulsing animation
+      this.scene.tweens.add({
+        targets: this.creatingPopup,
+        alpha: 1,
+        yoyo: true,
+        repeat: -1,
+        duration: 800,
+      });
+    } else {
+      this.creatingPopup.setVisible(true);
+    }
+  }
+
+  hideCreatingAccountPopup() {
+    if (this.creatingPopup) {
+      this.creatingPopup.setVisible(false);
+      this.scene.tweens.killTweensOf(this.creatingPopup);
+    }
+  }
   destroy() {
     // Remove resize listener
     if (this.resizeListener) {
