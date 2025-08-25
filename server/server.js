@@ -47,7 +47,12 @@ app.use(express.static(distPath));
  * so when a user types in a url that doesnt exist it reroutes user back to the homepage index.html
  */
 app.get(/.*/, (req, res) => {
-  res.sendFile(join(distPath, "index.html"));
+  console.log("REROUTING TO /index.html");
+  try {
+    res.sendFile(join(distPath, "index.html"));
+  } catch (err) {
+    console.error("Error sending index.html:", err);
+  }
 });
 
 // ----------------------
