@@ -11,7 +11,7 @@ export default function Home() {
     <section>
       <Banner
         title="Welcome to FishHub!"
-        subtitle="A good days fishen is better than a bad days work"
+        subtitle="I’m hooked… line and sinker."
       />
       <div className="playNow">
         <button

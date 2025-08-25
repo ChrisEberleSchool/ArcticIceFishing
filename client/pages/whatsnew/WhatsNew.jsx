@@ -6,7 +6,7 @@ export default function WhatsNew() {
     <main id="whatsNew">
       <Banner
         title="Whats New"
-        subtitle="I’m hooked… line and sinker."
+        subtitle="Good things come to those who bait."
         className="banner--contact"
       />
       <h1>What's New</h1>

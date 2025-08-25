@@ -7,7 +7,7 @@ export default function About() {
     <main id="about">
       <Banner
         title="About FishHub"
-        subtitle="Good things come to those who bait."
+        subtitle="A bad day’s fishin’ is better than a good day’s work."
         className="banner--about"
       />
       <div className="content">
