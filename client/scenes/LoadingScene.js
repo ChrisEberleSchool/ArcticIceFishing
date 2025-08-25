@@ -31,17 +31,6 @@ export default class LoadingScene extends Phaser.Scene {
       frameHeight: 18,
     });
 
-    // PLAYER PRELOAD
-    Player.preload(this);
-    // UI PRELOADS
-    GameBarUI.preload(this);
-    CoinUI.preload(this);
-    FishUI.preload(this);
-    FishFactory.preloadAll(this);
-    FishMiniGameUI.preload(this);
-    ItemFactory.preloadAll(this);
-    ShopUI.preload(this);
-
     // Once loading sprite is ready, show animation & progress bar
     this.load.once("complete", () => {
       // --- Loading animation ---
@@ -69,6 +58,16 @@ export default class LoadingScene extends Phaser.Scene {
 
       // Load the rest of the game assets
       this.loadGameAssets(progressBar, width, height);
+      // PLAYER PRELOAD
+      Player.preload(this);
+      // UI PRELOADS
+      GameBarUI.preload(this);
+      CoinUI.preload(this);
+      FishUI.preload(this);
+      FishFactory.preloadAll(this);
+      FishMiniGameUI.preload(this);
+      ItemFactory.preloadAll(this);
+      ShopUI.preload(this);
     });
 
     this.load.start();

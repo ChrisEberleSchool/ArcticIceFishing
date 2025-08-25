@@ -292,6 +292,12 @@ export default class ShopUI {
     const items = this.itemsByTab[name] || [];
     this.layoutItems(items);
 
+    //reset the scrollbar and itemsContainer position
+    this.itemsContainer.y = this.scrollArea.y;
+    if (this.scrollThumb) {
+      this.scrollThumb.y = this.scrollArea.y;
+    }
+
     // Update tab button visuals
     this.tabButtons.forEach((btn) => {
       if (btn.texture.key === name + "Tab") {

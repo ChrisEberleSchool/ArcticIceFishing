@@ -9,9 +9,9 @@ export default function Navbar() {
       </a>
 
       <nav className="navbar">
-        <a href="/about">About</a>
-        <a href="/contact">Contact</a>
-        <a href="/whatsnew">What's New</a>
+        <Link to="/about">About</Link>
+        <Link to="/contact">Contact</Link>
+        <Link to="/whatsnew">What's New</Link>
       </nav>
     </header>
   );
