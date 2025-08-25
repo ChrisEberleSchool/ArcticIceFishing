@@ -45,9 +45,10 @@ app.use(express.static(distPath));
  * SPA fallback
  * so when a user types in a url that doesnt exist it reroutes user back to the homepage index.html
  */
-// SPA fallback (catch-all)
 app.get(/^\/.*/, (req, res) => {
-  res.sendFile(join(distPath, "index.html"));
+  res.sendFile(join(distPath, "index.html"), (err) => {
+    if (err) res.status(500).send(err);
+  });
 });
 
 // ----------------------
