@@ -3,7 +3,7 @@ import Home from "./pages/home/Home.jsx";
 import Play from "./pages/play/Play.jsx";
 import About from "./pages/about/About.jsx";
 import Contact from "./pages/contact/Contact.jsx";
-import WhatsNew from "./pages/whatsnew/WhatsNew.jsx";
+import Updates from "./pages/updates/Updates.jsx";
 
 import "./index.css";
 
@@ -22,7 +22,7 @@ export default function App() {
           <Route path="/play" element={<Play />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/whatsnew" element={<WhatsNew />} />
+          <Route path="/updates" element={<Updates />} />
         </Routes>
       </main>
 

@@ -3,29 +3,19 @@ import socket from "../network/socket.js";
 import LoginSignupPage from "../ui/startUI/LoginSignupPage.js";
 import LoginPage from "../ui/startUI/LoginPage.js";
 import SignupPage from "../ui/startUI/SignupPage.js";
-// import SignupPage if you make one
 
 export default class AuthScene extends Phaser.Scene {
   constructor() {
-    super("AuthScene");
+    super("scene-auth");
   }
 
-  preload() {
-    // preload for the landing/login/signup pages
-    LoginSignupPage.preload(this);
-    LoginPage.preload(this);
-    SignupPage.preload(this);
-    // SignupPage.preload(this);
-  }
+  preload() {}
 
   create() {
     // instantiate page objects
     this.landingPage = new LoginSignupPage(this);
     this.loginPage = new LoginPage(this);
     this.signupPage = new SignupPage(this);
-    // this.signupPage = new SignupPage(this);
-
-    // define scene methods so page objects can call them
 
     this.showLoginSignupPage = () => {
       this.landingPage.open();
@@ -54,5 +44,8 @@ export default class AuthScene extends Phaser.Scene {
       this.loginPage?.destroy?.();
       this.signupPage?.destroy?.();
     });
+
+    // notify boot scene that we're ready
+    this.events.emit("ready");
   }
 }

@@ -11,7 +11,7 @@ export default function Navbar() {
       <nav className="navbar">
         <Link to="/about">About</Link>
         <Link to="/contact">Contact</Link>
-        <Link to="/whatsnew">What's New</Link>
+        <Link to="/updates">Updates</Link>
       </nav>
     </header>
   );

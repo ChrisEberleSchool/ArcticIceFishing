@@ -229,7 +229,7 @@ export default class ShopUI {
       width: scrollWidth,
       height: scrollHeight,
     } = this.scrollArea;
-    const scrollBarWidth = 20;
+    const scrollBarWidth = 40;
     const scrollBarX = scrollX + scrollWidth + 5;
     const scrollBarY = scrollY;
 
