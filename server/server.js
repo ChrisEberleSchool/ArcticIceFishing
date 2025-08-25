@@ -45,6 +45,8 @@ app.use(express.static(distPath));
 /*
  * SPA fallbacks
  * so when a user types in a url that doesnt exist it reroutes user back to the homepage index.html
+ *
+ * This code is currently ignored because render handles redirects to index.html
  */
 app.get(/.*/, (req, res) => {
   console.log("REROUTING TO /index.html");

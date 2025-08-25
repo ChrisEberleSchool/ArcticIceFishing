@@ -1,18 +1,38 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import App from "./App.jsx";
+import Home from "./pages/home/Home.jsx";
+import Play from "./pages/play/Play.jsx";
+import About from "./pages/about/About.jsx";
+import Contact from "./pages/contact/Contact.jsx";
+import Updates from "./pages/updates/Updates.jsx";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />, // layout
+    children: [
+      { index: true, element: <Home /> }, // homepage
+      { path: "play", element: <Play /> },
+      { path: "about", element: <About /> },
+      { path: "contact", element: <Contact /> },
+      { path: "updates", element: <Updates /> },
+      {
+        path: "*",
+        element: (
+          <h1 style={{ textAlign: "center", marginTop: "2rem" }}>
+            404 - Page Not Found
+          </h1>
+        ),
+      },
+    ],
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  /* Strict Mode (causes doubled instances of components)
   <React.StrictMode>
-    <BrowserRouter> 
-      <App />
-    </BrowserRouter>
-  </React.StrictMode> 
-  */
-
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+    <RouterProvider router={router} />
+  </React.StrictMode>
 );
