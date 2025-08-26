@@ -32,12 +32,15 @@ export default class AuthScene extends Phaser.Scene {
     this.landingPage.open();
 
     socket.on("authSuccess", (data) => {
-      // Hide popup if it was shown during signup
-      if (this.signupPage?.hideCreatingAccountPopup) {
-        this.signupPage.hideCreatingAccountPopup();
+      try {
+        this.signupPage?.hideCreatingAccountPopup?.();
+        this.landingPage?.close?.();
+        this.loginPage?.close?.();
+        this.signupPage?.close?.();
+        this.scene.start("LoadingScene", { username: data.username });
+      } catch (err) {
+        console.error("Auth success handler failed:", err);
       }
-
-      this.scene.start("LoadingScene", { username: data.username });
     });
 
     socket.on("authError", (msg) => {

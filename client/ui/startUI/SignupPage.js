@@ -51,7 +51,9 @@ export default class SignupPage {
         <div style="display:flex; flex-direction:column; gap:200px; align-items:center;">
           <input id="usernameSignup"
             style="
-              background: transparent;
+              background-color: transparent !important;
+              color: white !important;
+              -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;;
               border: none;
               outline: none;
               color: white;
@@ -64,7 +66,9 @@ export default class SignupPage {
           >
           <input id="passwordSignup" type="password"
             style="
-              background: transparent;
+              background-color: transparent !important;
+              color: white !important;
+              -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
               border: none;
               outline: none;
               color: white;
@@ -150,7 +154,7 @@ export default class SignupPage {
 
       // Adjust buttons
       this.signupBtn.setPosition(
-        width - horizontalButtonOffset,
+        width - this.horizontalButtonOffset,
         height - this.verticalButtonOffset
       );
       this.backBtn.setPosition(
