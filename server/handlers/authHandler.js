@@ -7,26 +7,26 @@ const USE_ENCRYPTION = false;
 
 export default function authHandler(socket, io) {
   // SIGNUP
-  socket.on("signup", async ({ username, password }) => {
+  socket.on("signup", async ({ username, password }, callback) => {
     if (!username || !password) {
+      if (callback) callback({ success: false, message: "Missing fields" });
       return socket.emit("authError", "Missing fields");
     }
 
     try {
-      // Check if user already exists in DB
       const existingUser = await prisma.user.findUnique({
         where: { username },
       });
+
       if (existingUser) {
+        if (callback)
+          callback({ success: false, message: "Username already exists" });
         return socket.emit("authError", "Username already exists");
       }
 
-      let storedPassword;
-      if (USE_ENCRYPTION) {
-        storedPassword = await bcrypt.hash(password, 10);
-      } else {
-        storedPassword = password; // plaintext
-      }
+      let storedPassword = USE_ENCRYPTION
+        ? await bcrypt.hash(password, 10)
+        : password;
 
       const newUser = await prisma.user.create({
         data: {
@@ -35,20 +35,22 @@ export default function authHandler(socket, io) {
         },
       });
 
-      // Store user info in memory (without password)
       users[username] = {
         id: newUser.id,
         socketId: socket.id,
       };
 
-      // Attach to socket for later use
       socket.userId = newUser.id;
       socket.username = username;
+
+      if (callback) callback({ success: true });
 
       socket.emit("authSuccess", { username });
       console.log("Player Joined World:", username);
     } catch (err) {
       console.error("Signup Error:", err);
+      if (callback)
+        callback({ success: false, message: "Something went wrong." });
       socket.emit("authError", "Something went wrong.");
     }
   });

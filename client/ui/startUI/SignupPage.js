@@ -191,18 +191,8 @@ export default class SignupPage {
     this.showCreatingAccountPopup();
 
     try {
-      socket.emit("signup", { username, password }, (response) => {
-        // Hide popup after server responds
-        this.hideCreatingAccountPopup();
-
-        if (response.success) {
-          alert("Account created!");
-          this.close();
-          this.scene.showLoginSignupPage();
-        } else {
-          alert("Error: " + response.message);
-        }
-      });
+      // Don't use the callback version anymore
+      socket.emit("signup", { username, password });
     } catch (err) {
       this.hideCreatingAccountPopup();
       socket.emit("clientError", { message: err.message, stack: err.stack });
