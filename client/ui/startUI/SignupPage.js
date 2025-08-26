@@ -6,8 +6,9 @@ export default class SignupPage {
     this.gameWidth = scene.sys.game.config.width;
     this.gameHeight = scene.sys.game.config.height;
 
-    this.horizontalButtonOffset = 250;
-    this.verticalButtonOffset = 200;
+    // Buttons
+    this.horizontalButtonOffset = 650;
+    this.verticalButtonOffset = 100;
 
     // background
     this.bg = scene.add
@@ -60,7 +61,7 @@ export default class SignupPage {
       .image(
         this.gameWidth - this.horizontalButtonOffset,
         this.gameHeight - this.verticalButtonOffset,
-        "signupBtn"
+        "signupButton"
       )
       .setVisible(false)
       .setInteractive({ useHandCursor: true });
@@ -69,7 +70,7 @@ export default class SignupPage {
       .image(
         this.horizontalButtonOffset,
         this.gameHeight - this.verticalButtonOffset,
-        "backBtn"
+        "signupBackButton"
       )
       .setVisible(false)
       .setInteractive({ useHandCursor: true });
@@ -163,7 +164,7 @@ export default class SignupPage {
 
     this.backBtn.once("pointerdown", () => {
       this.close();
-      this.scene.showLoginPage();
+      this.scene.showLoginSignupPage();
     });
   }
 
