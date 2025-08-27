@@ -8,6 +8,7 @@ import Play from "./pages/play/Play.jsx";
 import About from "./pages/about/About.jsx";
 import Contact from "./pages/contact/Contact.jsx";
 import Updates from "./pages/updates/Updates.jsx";
+import NotFound from "./pages/NotFound/NotFound.jsx";
 
 const router = createBrowserRouter([
   {
@@ -19,14 +20,7 @@ const router = createBrowserRouter([
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "updates", element: <Updates /> },
-      {
-        path: "*",
-        element: (
-          <h1 style={{ textAlign: "center", marginTop: "2rem" }}>
-            404 - Page Not Found
-          </h1>
-        ),
-      },
+      { path: "*", element: <NotFound /> }, // 404 page
     ],
   },
 ]);

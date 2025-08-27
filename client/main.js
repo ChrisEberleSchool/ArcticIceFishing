@@ -1,10 +1,10 @@
 import Phaser from "phaser";
-import sizes from "./config/gameConfig.js";
-import BootScene from "./scenes/BootScene.js";
-import AuthScene from "./scenes/AuthScene.js";
-import LoadingScene from "./scenes/LoadingScene.js";
-import GameScene from "./scenes/GameScene.js";
-import UIScene from "./scenes/UIScene.js";
+import sizes from "./game/Config/gameConfig.js";
+import BootScene from "./game/scenes/BootScene.js";
+import AuthScene from "./game/scenes/AuthScene.js";
+import LoadingScene from "./game/scenes/LoadingScene.js";
+import GameScene from "./game/scenes/GameScene.js";
+import UIScene from "./game/scenes/UIScene.js";
 
 // Export function to start Phaser
 export function startGame(parentElementOrId) {

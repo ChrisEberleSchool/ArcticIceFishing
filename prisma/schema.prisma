@@ -25,6 +25,7 @@ model User {
   updatedAt  DateTime     @updatedAt
 
   biggestFish BiggestFish[]
+  items Items[]
 }
 
 model BiggestFish {
@@ -38,4 +39,14 @@ model BiggestFish {
   caughtAt  DateTime @default(now())
 
   @@unique([userId, fishName])  // enforce one fish type per user
+}
+
+model Items {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  itemName  String
+  quantity Int
+  
+  @@unique([userId, itemName])  // enforce one fish type per user
 }
